@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../structure/drawer.dart';
+import '../widgets/drawer.dart';
+import '../blocs/sets_bloc.dart';
 
 class KingdomPage extends StatelessWidget {    
   KingdomPage({Key key, this.title}) : super(key: key);

@@ -31,7 +31,7 @@ class _MyDrawerState extends State<MyDrawer> {
               Navigator.of(context).pop();
               Navigator.push(
                 context,
-                new MaterialPageRoute(builder: (ctxt) => new SetSelectionPage(title: "Select Sets")),
+                new MaterialPageRoute(builder: (ctxt) => new SetSelectionPage(pageTitle: "Select Sets")),
               );
             },
           ),

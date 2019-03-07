@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import './structure/drawer.dart';
+import './widgets/drawer.dart';
 import 'pages/kingdom.dart';
 
 void main() => runApp(MyApp());
