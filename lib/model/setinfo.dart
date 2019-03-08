@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 enum SetName {
+  Undefined,
   Dominion,
   DominionSecondEdition,
 	Intrigue,

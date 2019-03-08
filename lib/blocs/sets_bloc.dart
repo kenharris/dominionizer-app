@@ -35,17 +35,19 @@ class SetsBloc {
 
     if (event is SetsInitializeEvent)
     {
-      newState = SetsBlocState(await _repository.fetchAllSets(), _state.isLoading);
+      if (_state.sets == null || _state.sets.length == 0)
+      {
+        newState = SetsBlocState(await _repository.fetchAllSets(), _state.isLoading);
+      }
+      else
+      {
+        newState = _state;
+      }
     }
     else if (event is SetInclusionEvent)
     {
       await _repository.updateSetInclusion(event.id, event.include);
       newState = SetsBlocState(await _repository.fetchAllSets(), _state.isLoading);
-    }
-    else if (event is ResetSetsEvent)
-    {
-      await _repository.refreshSets();
-      newState =SetsBlocState(await _repository.fetchAllSets(), false);
     }
 
     _state = SetsBlocState(newState.sets, newState.isLoading);

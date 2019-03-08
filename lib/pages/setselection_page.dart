@@ -18,7 +18,7 @@ class SetSelectionPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              ResetDatabaseButton(),
+              const Text("Select sets for inclusion", style: TextStyle(fontSize: 25),),
               Expanded(
                 child: SetsList()
               )

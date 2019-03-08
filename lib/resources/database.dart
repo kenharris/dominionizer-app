@@ -2,121 +2,16 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'dart:io';
+import 'dart:typed_data';
 import '../model/setinfo.dart';
+import '../model/card.dart';
+import 'package:flutter/services.dart';
 
 class DBProvider {
   DBProvider._();
   static final DBProvider db = DBProvider._();
 
   static Database _database;
-
-  final List<Map<String, dynamic>> SETS = [
-    {
-      'id': SetName.Dominion.index,
-      'name': 'Dominion',
-      'release': 'Summer 2008',
-      'number_of_cards': 500,
-      'included': false
-    },
-    {
-      'id': SetName.DominionSecondEdition.index,
-      'name': 'Dominion (2nd Edition)',
-      'release': 'Fall 2016',
-      'number_of_cards': 500,
-      'included': false
-    },
-    {
-      'id': SetName.Intrigue.index,
-      'name': 'Intrigue',
-      'release': 'Spring 2009',
-      'number_of_cards': 500,
-      'included': false
-    },
-    {
-      'id': SetName.IntrigueSecondEdition.index,
-      'name': 'Intrigue (2nd Edition)',
-      'release': 'Fall 2016',
-      'number_of_cards': 300,
-      'included': false
-    },
-    {
-      'id': SetName.Seaside.index,
-      'name': 'Seaside',
-      'release': 'Fall 2009',
-      'number_of_cards': 300,
-      'included': false
-    },
-    {
-      'id': SetName.Alchemy.index,
-      'name': 'Alchemy',
-      'release': 'Spring 2010',
-      'number_of_cards': 150,
-      'included': false
-    },
-    {
-      'id': SetName.Prosperity.index,
-      'name': 'Prosperity',
-      'release': 'Fall 2010',
-      'number_of_cards': 300,
-      'included': false
-    },
-    {
-      'id': SetName.Cornucopia.index,
-      'name': 'Cornucopia',
-      'release': 'Summer 2011',
-      'number_of_cards': 150,
-      'included': false
-    },
-    {
-      'id': SetName.Hinterlands.index,
-      'name': 'Hinterlands',
-      'release': 'Fall 2011',
-      'number_of_cards': 300,
-      'included': false
-    },
-    {
-      'id': SetName.DarkAges.index,
-      'name': 'Dark Ages',
-      'release': 'Fall 2012',
-      'number_of_cards': 500,
-      'included': false
-    },
-    {
-      'id': SetName.Guilds.index,
-      'name': 'Guilds',
-      'release': 'Summer 2013',
-      'number_of_cards': 150,
-      'included': false
-    },
-    {
-      'id': SetName.Adventures.index,
-      'name': 'Adventures',
-      'release': 'Spring 2015',
-      'number_of_cards': 400,
-      'included': false
-    },
-    {
-      'id': SetName.Empires.index,
-      'name': 'Empires',
-      'release': 'Summer 2016',
-      'number_of_cards': 300,
-      'included': false
-    },
-    {
-      'id': SetName.Nocturne.index,
-      'name': 'Nocturne',
-      'release': 'Fall 2017',
-      'number_of_cards': 500,
-      'included': false
-    },
-    {
-      'id': SetName.Renaissance.index,
-      'name': 'Renaissance',
-      'release': 'Fall 2018',
-      'number_of_cards': 300,
-      'included': false
-    }
-  ];
 
   Future<Database> get database async {
     if (_database != null)
@@ -125,29 +20,22 @@ class DBProvider {
     _database = await initDB();
     return _database;
   }
-
-  refreshDB() async {
-    var db = await database;
-    await db.delete('sets');
-
-    for (final record in SETS) {
-      await db.insert("sets", record);
-    }
-  }
-
+  
   initDB() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentsDirectory.path, "Dominion.db");
-    return await openDatabase(path, version: 1, readOnly: false, onOpen: (db) {
-    }, onCreate: (Database db, int version) async {
-      await db.execute("CREATE TABLE sets ("
-          "id INTEGER PRIMARY KEY,"
-          "name TEXT,"
-          "release TEXT,"
-          "number_of_cards INTEGER,"
-          "included BIT"
-          ")");
-    });
+    String path = join(documentsDirectory.path, "dominion.db");
+
+    // Only copy if the database doesn't exist
+    if (FileSystemEntity.typeSync(path) == FileSystemEntityType.notFound){
+      // Load database from asset and copy
+      ByteData data = await rootBundle.load(join('assets', 'dominion.db'));
+      List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+
+      // Save copied asset to documents
+      await new File(path).writeAsBytes(bytes);
+    }
+
+    return await openDatabase(path, version: 1, readOnly: false);
   }
 
   Future<List<SetInfo>> getSets() async {
@@ -170,5 +58,16 @@ class DBProvider {
     }
 
     return false;
+  }
+
+  Future<List<Card>> getCards({int limit, bool sortByRandom}) async {
+    final db = await database;
+    var res = await db.query('cards', orderBy: sortByRandom ? "RANDOM()" : null, limit: (limit != null) ? limit : null);
+    if (res.isNotEmpty) {
+      List<Card> cards = res.map((c) => Card.fromMap(c)).toList();
+      return cards;
+    } else {
+      return List<Card>();
+    }
   }
 }
