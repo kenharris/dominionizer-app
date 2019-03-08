@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import '../pages/settings.dart';
-import '../pages/kingdom.dart';
-import '../pages/setselection.dart';
+import 'package:dominionizer_app/pages.dart';
 
 class MyDrawer extends StatefulWidget {  
   @override
@@ -48,6 +46,7 @@ class _MyDrawerState extends State<MyDrawer> {
           ListTile(
             title: Text('Settings'),
             onTap: () {
+              Navigator.of(context).pop();
               Navigator.push(
                 context,
                 new MaterialPageRoute(builder: (ctx) => new SettingsPage(title: "Settings"))

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:dominionizer_app/widgets.dart';
 import 'package:dominionizer_app/model/setinfo.dart';
 import 'package:dominionizer_app/blocs/sets_event.dart';
+import 'package:dominionizer_app/blocs/sets_bloc.dart';
 
 class SetsListState extends State<SetsList> {  
   void _toggleSelectedState (SetName id, bool included) async
@@ -11,9 +12,9 @@ class SetsListState extends State<SetsList> {
 
   @override
   Widget build (BuildContext ctxt) {
-    return StreamBuilder<List<SetInfo>>(
+    return StreamBuilder<SetsBlocState>(
       stream: ServiceProviderWidget.of(context).setsBloc.sets,
-      builder: (BuildContext context, AsyncSnapshot<List<SetInfo>> snapshot) {
+      builder: (BuildContext context, AsyncSnapshot<SetsBlocState> snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
             return const CircularProgressIndicator();
@@ -23,35 +24,33 @@ class SetsListState extends State<SetsList> {
             else
               return ListView.builder
               (
-                itemCount: snapshot.data.length,
+                itemCount: snapshot.data.sets.length,
                 itemBuilder: (BuildContext ctxt, int index) {
-                  return new GestureDetector(
-                    child:Container(
-                      decoration: const BoxDecoration(
-                        border:Border(
-                          top:BorderSide(width: 1.0, color: Colors.green),
-                          bottom:BorderSide(width: 1.0, color: Colors.green),
-                          left:BorderSide(width: 1.0, color: Colors.green),
-                          right:BorderSide(width: 1.0, color: Colors.green)
-                        )
+                  return Container(
+                    decoration: const BoxDecoration(
+                      border:Border(
+                        top:BorderSide(width: 1.0, color: Colors.green),
+                        bottom:BorderSide(width: 1.0, color: Colors.green),
+                        left:BorderSide(width: 1.0, color: Colors.green),
+                        right:BorderSide(width: 1.0, color: Colors.green)
+                      )
+                    ),
+                    child: ListTile(
+                      leading: Text("${snapshot.data.sets[index].id.index}"),
+                      title: Text(
+                        snapshot.data.sets[index].name, 
+                        style: TextStyle (
+                          color: snapshot.data.sets[index].included ? Colors.green : Colors.red,
+                        ), 
+                        textAlign: TextAlign.start
                       ),
-                      child: ListTile(
-                        leading: Text("${snapshot.data[index].id.index}"),
-                        title: Text(
-                          snapshot.data[index].name, 
-                          style: TextStyle (
-                            color: snapshot.data[index].included ? Colors.red : Colors.black,
-                          ), 
-                          textAlign: TextAlign.start
-                        ),
-                        trailing: Icon(
-                          snapshot.data[index].included ? Icons.check : Icons.close,
-                          color: snapshot.data[index].included ? Colors.green : Colors.red,
-                        ),
-                      onTap: () => _toggleSelectedState(snapshot.data[index].id, !snapshot.data[index].included)
+                      trailing: Icon(
+                        snapshot.data.sets[index].included ? Icons.check : Icons.close,
+                        color: snapshot.data.sets[index].included ? Colors.green : Colors.red,
                       ),
-                    )
-                  ); 
+                    onTap: () => _toggleSelectedState(snapshot.data.sets[index].id, !snapshot.data.sets[index].included)
+                    ),
+                  );
                 }
               );
         }

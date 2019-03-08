@@ -1,12 +1,19 @@
 import '../model/setinfo.dart';
 import '../resources/repository.dart';
+import 'package:meta/meta.dart';
 import 'dart:async';
 import 'package:dominionizer_app/model/setinfo.dart';
 import 'package:dominionizer_app/blocs/sets_event.dart';
 
-class SetsBloc {
-  List<SetInfo> _sets;
+@immutable
+class SetsBlocState {
+  final List<SetInfo> sets;
+  final bool isLoading;
 
+  SetsBlocState(this.sets, this.isLoading);
+}
+
+class SetsBloc {
   SetsBloc()
   {
     _setsEventController.stream.listen(_mapEventToState);
@@ -14,30 +21,35 @@ class SetsBloc {
   }
 
   final _repository = Repository();
-  final _setsStateController = StreamController<List<SetInfo>>();
+  final _setsStateController = StreamController<SetsBlocState>.broadcast();
   final _setsEventController = StreamController<SetsEvent>();
+
+  SetsBlocState _state =SetsBlocState([], false);
 
   Sink<SetsEvent> get setsEventSink => _setsEventController.sink;
 
-  get sets => _setsStateController.stream;
+  Stream<SetsBlocState> get sets => _setsStateController.stream;
 
   void _mapEventToState(SetsEvent event) async {
+    SetsBlocState newState;
+
     if (event is SetsInitializeEvent)
     {
-      _sets = await _repository.fetchAllSets();
+      newState = SetsBlocState(await _repository.fetchAllSets(), _state.isLoading);
     }
     else if (event is SetInclusionEvent)
     {
       await _repository.updateSetInclusion(event.id, event.include);
-      _sets = await _repository.fetchAllSets();
+      newState = SetsBlocState(await _repository.fetchAllSets(), _state.isLoading);
     }
     else if (event is ResetSetsEvent)
     {
       await _repository.refreshSets();
-      _sets = await _repository.fetchAllSets();
+      newState =SetsBlocState(await _repository.fetchAllSets(), false);
     }
 
-    _setsStateController.sink.add(_sets);
+    _state = SetsBlocState(newState.sets, newState.isLoading);
+    _setsStateController.sink.add(newState);
   }
 
   dispose() {
