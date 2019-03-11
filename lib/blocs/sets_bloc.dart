@@ -24,11 +24,12 @@ class SetsBloc {
   final _setsStateController = StreamController<SetsBlocState>.broadcast();
   final _setsEventController = StreamController<SetsEvent>();
 
-  SetsBlocState _state =SetsBlocState([], false);
+  SetsBlocState _state = SetsBlocState([], false);  
 
   Sink<SetsEvent> get setsEventSink => _setsEventController.sink;
 
   Stream<SetsBlocState> get sets => _setsStateController.stream;
+  SetsBlocState get state => _state;
 
   void _mapEventToState(SetsEvent event) async {
     SetsBlocState newState;
@@ -47,6 +48,16 @@ class SetsBloc {
     else if (event is SetInclusionEvent)
     {
       await _repository.updateSetInclusion(event.id, event.include);
+      newState = SetsBlocState(await _repository.fetchAllSets(), _state.isLoading);
+    }
+    else if (event is SetIncludeAllEvent)
+    {
+      await _repository.updateAllSetsInclusion(true);
+      newState = SetsBlocState(await _repository.fetchAllSets(), _state.isLoading);
+    }
+    else if (event is SetExcludeAllEvent)
+    {
+      await _repository.updateAllSetsInclusion(false);
       newState = SetsBlocState(await _repository.fetchAllSets(), _state.isLoading);
     }
 

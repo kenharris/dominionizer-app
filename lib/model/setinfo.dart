@@ -19,6 +19,25 @@ enum SetName {
 	Renaissance,
 }
 
+const SetNames = [
+  "Undefined",
+  "Dominion",
+  "Dominion (2nd Edition)",
+	"Intrigue",
+  "Intrigue (2nd Edition)",
+	"Seaside",
+	"Alchemy",
+	"Prosperity",
+	"Cornucopia",
+	"Hinterlands",
+	"DarkAges",
+	"Guilds",
+	"Adventures",
+	"Empires",
+	"Nocturne",
+	"Renaissance",
+];
+
 class SetInfo {
   SetInfo({Key key, this.id, this.name, this.released, this.included});
 
@@ -26,6 +45,8 @@ class SetInfo {
   String released;
   SetName id;
   bool included;
+
+  String get setName => SetNames[id.index];
 
   SetInfo.fromMap(Map<String, dynamic> map)
     : id = SetName.values[map['id']],

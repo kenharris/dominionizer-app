@@ -60,9 +60,29 @@ class DBProvider {
     return false;
   }
 
-  Future<List<Card>> getCards({int limit, bool sortByRandom}) async {
+  Future<bool> updateAllSetsInclusion(bool included) async {
     final db = await database;
-    var res = await db.query('cards', orderBy: sortByRandom ? "RANDOM()" : null, limit: (limit != null) ? limit : null);
+    var res = await db.update('sets', { 'included': (included ? 1 : 0) });
+
+    if (res >= 0)
+      return true;
+    else
+      return false;
+  }
+
+  Future<List<Card>> getCards({List<int> sets, int limit, bool sortByRandom}) async {
+    final db = await database;
+    
+    StringBuffer sb = StringBuffer();
+    sb.write("SELECT * FROM cards ");
+    sb.write("WHERE [set] in (${sets.map((s) => s.toString()).join(",")}) ");
+    if (sortByRandom)
+      sb.write("ORDER BY RANDOM() ");
+    if (limit != null)
+      sb.write("LIMIT $limit ");
+    
+    var res = await db.rawQuery(sb.toString());
+
     if (res.isNotEmpty) {
       List<Card> cards = res.map((c) => Card.fromMap(c)).toList();
       return cards;

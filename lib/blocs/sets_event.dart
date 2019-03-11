@@ -10,3 +10,6 @@ class SetInclusionEvent extends SetsEvent {
 
   SetInclusionEvent({this.id, this.include});
 }
+
+class SetIncludeAllEvent extends SetsEvent { }
+class SetExcludeAllEvent extends SetsEvent { }

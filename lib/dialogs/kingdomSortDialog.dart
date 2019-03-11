@@ -1,13 +1,23 @@
+import 'package:dominionizer_app/blocs/kingdom_bloc.dart';
 import 'package:flutter/material.dart';
 
-class _IntListDialogState extends State<IntListDialog> {
-  int _selectedValue;
+class _KingdomSortDialogState extends State<KingdomSortDialog> {
+  KingdomSortType _selectedValue;
 
-  _IntListDialogState(this._selectedValue);
+  static const kingdomSortTypeNames = [
+    "Card Name Ascending",
+    "Card Name Descending",
+    "Set Name Ascending",
+    "Set Name Descending",
+    "Cost Ascending",
+    "Cost Descending"
+  ];
 
-  void _setRadioValue(int i) {
+  _KingdomSortDialogState(this._selectedValue);
+
+  void _setRadioValue(KingdomSortType kst) {
     setState((){
-      _selectedValue = i;
+      _selectedValue = kst;
     });
   }
 
@@ -21,14 +31,13 @@ class _IntListDialogState extends State<IntListDialog> {
           children: <Widget>[
             Expanded(
               child: ListView.builder(
-                itemCount: widget._values.length,
+                itemCount: KingdomSortType.values.length,
                 itemBuilder: (BuildContext ctxt, int index) {
                   return RadioListTile(
-                    title: Text("${widget._values[index]}"),
-                    subtitle: widget._values[index] == widget._defaultValue ? Text("Default") : null,
-                    selected: widget._values[index] == _selectedValue,
-                    onChanged: (i) => _setRadioValue(i),
-                    value: widget._values[index],
+                    title: Text("${kingdomSortTypeNames[index]}"),
+                    selected: KingdomSortType.values[index] == _selectedValue,
+                    onChanged: (kst) => _setRadioValue(kst),
+                    value: KingdomSortType.values[index],
                     groupValue: _selectedValue,
                   );
                 },
@@ -55,13 +64,10 @@ class _IntListDialogState extends State<IntListDialog> {
   }
 }
 
-class IntListDialog extends StatefulWidget {
-  List<int> _values;
-  int _selectedValue;
-  int _defaultValue;
-
-  IntListDialog(this._values, this._selectedValue, this._defaultValue);
+class KingdomSortDialog extends StatefulWidget {
+  final KingdomSortType _kst;
+  KingdomSortDialog(this._kst);
 
   @override
-  _IntListDialogState createState() => _IntListDialogState(this._selectedValue);
+  _KingdomSortDialogState createState() => _KingdomSortDialogState(this._kst);
 }

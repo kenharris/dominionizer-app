@@ -45,16 +45,6 @@ class AppSetting {
     return (value as AppSettingStringValue).value;
   }
 
-  static AppSettingType _mapValueToType(AppSettingValue value) {
-    if (value is AppSettingBooleanValue)
-      return AppSettingType.Bool;
-
-    if (value is AppSettingIntegerValue)
-      return AppSettingType.Int;
-
-    return AppSettingType.String;
-  }
-
   static String _mapValueToString(AppSettingValue value) {
     if (value is AppSettingBooleanValue) {
       return "${value.value == true ? 1 : 0}";

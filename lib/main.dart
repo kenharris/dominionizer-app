@@ -1,19 +1,24 @@
+import 'package:dominionizer_app/dominion.dart';
+import 'package:dominionizer_app/widgets/app_settings.dart';
 import 'package:flutter/material.dart';
-import 'package:dominionizer_app/widgets.dart';
-import 'package:dominionizer_app/pages.dart';
+import 'package:dominionizer_app/blocs/app_bloc.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  final AppBloc appService = AppBloc();
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+  runApp(DominionizerApp(appService));
+}
+
+class DominionizerApp extends StatelessWidget {
+  final AppBloc appService;
+
+  DominionizerApp(this.appService);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData.dark(),        
-      home: new Scaffold(
-        body: KingdomPage(title: 'Flutter Demo Home Page'),
-      ),
+    return AppSettingsProvider (
+      appBloc: appService,
+      child: RandomizerWidget()
     );
   }
 }
