@@ -9,6 +9,6 @@ class ServiceProviderWidget extends InheritedWidget {
   @override
   bool updateShouldNotify(InheritedWidget oldWidget) => true;
 
-  static ServiceProviderWidget of(BuildContext context) =>
-    context.inheritFromWidgetOfExactType(ServiceProviderWidget);
+  static SetsBloc of(BuildContext context) =>
+    (context.inheritFromWidgetOfExactType(ServiceProviderWidget) as ServiceProviderWidget).setsBloc;
 }

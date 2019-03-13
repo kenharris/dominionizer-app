@@ -13,17 +13,9 @@ class SettingsPageState extends State<SettingsPage> {
 
   AppBlocState get _appState => AppSettingsProvider.of(context).state;
 
-  final sc = StreamController<int>();
-
-  @override
-  void dispose() {
-    sc.close();
-    super.dispose();
-  }
-
   void _updateAllSettings() {
     if (_isDirty) {
-      AppSettingsProvider.of(context).appEventSink.add(ChangeAllSettingsEvent(_shuffleSize, _isAutoBlacklist, _isDarkTheme));
+      AppSettingsProvider.of(context).updateAllSettings(_shuffleSize, _isAutoBlacklist, _isDarkTheme);
     }
     Navigator.of(context).pop();
   }
@@ -60,7 +52,6 @@ class SettingsPageState extends State<SettingsPage> {
 
   @override
   void initState() {
-    sc.stream.listen(_updateSuffleSize);
     _isDirty = false;
 
     super.initState();

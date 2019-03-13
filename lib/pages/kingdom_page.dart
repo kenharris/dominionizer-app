@@ -3,6 +3,7 @@ import 'package:dominionizer_app/blocs/sets_bloc.dart';
 import 'package:dominionizer_app/dialogs/kingdomSortDialog.dart';
 import 'package:dominionizer_app/model/setinfo.dart';
 import 'package:dominionizer_app/widgets/app_settings.dart';
+import 'package:dominionizer_app/widgets/cardCost.dart';
 import 'package:flutter/material.dart';
 import '../widgets/drawer.dart';
 import '../blocs/kingdom_bloc.dart';
@@ -28,42 +29,8 @@ class KingdomPageState extends State<KingdomPage> {
 
   void _newShuffle() {
     List<int> setIds = _sets.map((si) => si.id.index).toList();
-    kingdomBloc.kingdomEventSink.add(DrawKingdomEvent(shuffleSize: _cardsToShuffle, autoBlacklist: _autoBlacklist, setIds: setIds));
+    kingdomBloc.drawNewKingdom(shuffleSize: _cardsToShuffle, autoBlacklist: _autoBlacklist, setIds: setIds);
   }
-
-  List<Widget> _buildCostChildren(int coins, int potions, int debt) {
-    List<Widget> builder = List<Widget>();
-
-    double size = 12;
-    double iconSize = 8;
-    double space = 4;
-    TextStyle style = TextStyle(fontSize: size);
-
-    if (coins > 0) {
-      builder.add(Text("$coins", style: style));
-      builder.add(Icon(FontAwesomeIcons.coins, size: iconSize, color: Colors.yellow,));
-    }
-
-    if (potions > 0) {
-      if (coins > 0)
-        builder.add(SizedBox(width: space));
-
-      if (potions > 1) {
-        builder.add(Text("$potions", style: style));
-      }
-      builder.add(Icon(FontAwesomeIcons.flask, size: iconSize, color: Colors.blue));
-    }
-
-    if (debt > 0) {
-      if (coins > 0 || potions > 0)
-        builder.add(SizedBox(width: space));
-
-      builder.add(Text("$debt", style: style));
-      builder.add(Icon(FontAwesomeIcons.drawPolygon, size: iconSize));
-    }
-
-    return builder;
-  }  
 
   void _onSetInitialize(SetsBlocState setsState) {
     _sets = setsState.sets.where((s) => s.included).toList();
@@ -71,7 +38,7 @@ class KingdomPageState extends State<KingdomPage> {
 
   void _onAppStateChange(AppBlocState appState) {
     _autoBlacklist = appState.autoBlacklist;
-    _cardsToShuffle =appState.cardsToShuffle;
+    _cardsToShuffle = appState.cardsToShuffle;
   }
 
   void _showDialog() {
@@ -81,7 +48,7 @@ class KingdomPageState extends State<KingdomPage> {
         return KingdomSortDialog(_sortType);
       }
     ).then((kst) {
-      kingdomBloc.kingdomEventSink.add(SortKingdomEvent(kst));
+      kingdomBloc.sortKingdom(kst);
     });
   }
 
@@ -89,6 +56,7 @@ class KingdomPageState extends State<KingdomPage> {
   void initState() {
     kingdomBloc.kingdomStream.listen(_respondToState);
     setsBloc.sets.listen(_onSetInitialize);
+    setsBloc.initialize();
 
     super.initState();
   }
@@ -97,7 +65,7 @@ class KingdomPageState extends State<KingdomPage> {
   Widget build (BuildContext ctxt) {
     AppBloc appBloc = AppSettingsProvider.of(context);
     appBloc.appStateStream.where((s) => s.autoBlacklist !=_autoBlacklist || s.cardsToShuffle !=_cardsToShuffle).listen(_onAppStateChange);
-    appBloc.appEventSink.add(InitializeAppEvent());
+    appBloc.initialize();
     return Scaffold(
       appBar: AppBar(
         title: Text("Kingdom Page"),
@@ -168,8 +136,10 @@ class KingdomPageState extends State<KingdomPage> {
                                                   textAlign: TextAlign.start,
                                                   style: TextStyle(fontSize: _kingdomCardSize),
                                                 ),
-                                                Row(
-                                                  children: _buildCostChildren(snapshot.data.cards[index].coins, snapshot.data.cards[index].potions, snapshot.data.cards[index].debt)
+                                                CardCost(
+                                                  snapshot.data.cards[index].coins, 
+                                                  snapshot.data.cards[index].potions, 
+                                                  snapshot.data.cards[index].debt
                                                 ),
                                               ]
                                             ) 

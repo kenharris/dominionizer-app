@@ -70,16 +70,37 @@ class DBProvider {
       return false;
   }
 
-  Future<List<Card>> getCards({List<int> sets, int limit, bool sortByRandom}) async {
+  Future<List<Card>> getCards({List<int> sets, int limit, bool sortByRandom, List<int> blacklistIds, List<int> idsToFetch}) async {
     final db = await database;
     
     StringBuffer sb = StringBuffer();
-    sb.write("SELECT * FROM cards ");
-    sb.write("WHERE [set] in (${sets.map((s) => s.toString()).join(",")}) ");
-    if (sortByRandom)
-      sb.write("ORDER BY RANDOM() ");
+    sb.write(" SELECT * FROM cards ");
+
+    List<String> whereClauses = [];
+    if (sets != null && sets.length > 0) {
+      whereClauses.add(" [set] in (${sets.map((s) => s.toString()).join(",")}) ");
+    }
+
+    if (blacklistIds != null && blacklistIds.length > 0) {
+      whereClauses.add(" [id] NOT IN (${blacklistIds.join(",")}) ");
+    }
+
+    if (idsToFetch != null) {
+      if (idsToFetch.length > 0) {
+        whereClauses.add(" [id] IN (${idsToFetch.join(",")}) ");
+      } else {
+        whereClauses.add(" [id] = -1 ");
+      }
+    }
+    
+    if (whereClauses.length > 0) {
+      sb.write(" WHERE ${whereClauses.join(" AND ")} ");
+    }
+
+    if (sortByRandom != null)
+      sb.write(" ORDER BY RANDOM() ");
     if (limit != null)
-      sb.write("LIMIT $limit ");
+      sb.write(" LIMIT $limit ");
     
     var res = await db.rawQuery(sb.toString());
 

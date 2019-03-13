@@ -4,6 +4,7 @@ import 'package:meta/meta.dart';
 import 'dart:async';
 
 abstract class KingdomBlocEvent { }
+class RestoreMostRecentKingdomEvent extends KingdomBlocEvent { }
 class DrawKingdomEvent extends KingdomBlocEvent {
   final bool autoBlacklist;
   final int shuffleSize;
@@ -42,6 +43,7 @@ class KingdomBloc {
   KingdomBloc()
   {
     _kingdomEventController.stream.listen(_mapEventToState);
+    restoreMostRecentKingdom();
   }
 
   final _repository = Repository();
@@ -51,15 +53,46 @@ class KingdomBloc {
   KingdomSortType _sortType;
   List<Card> _cards = [];
 
-  Sink<KingdomBlocEvent> get kingdomEventSink => _kingdomEventController.sink;
   Stream<KingdomBlocState> get kingdomStream => _kingdomStateController.stream;
+  Sink<KingdomBlocEvent> get _sink => _kingdomEventController.sink;
+
+  void restoreMostRecentKingdom() {
+    _sink.add(RestoreMostRecentKingdomEvent());
+  }
+
+  void drawNewKingdom({
+    @required autoBlacklist,
+    @required shuffleSize,
+    setIds
+  }) {
+    _sink.add(DrawKingdomEvent(shuffleSize: shuffleSize, autoBlacklist: autoBlacklist, setIds: setIds));
+  }
+
+  void sortKingdom(KingdomSortType kst) {
+    _sink.add(SortKingdomEvent(kst));
+  }
 
   void _mapEventToState(KingdomBlocEvent event) async {
     KingdomBlocState newState;
 
-    if (event is DrawKingdomEvent)
+    if (event is RestoreMostRecentKingdomEvent)
     {
-      _cards = await _repository.fetchCards(sets: event.setIds, limit: event.shuffleSize, shuffle: true);
+      _cards = await _repository.loadMostRecentKingdom();
+      newState = KingdomBlocState(_cards, false, KingdomSortType.CardNameAscending);
+    }
+    else if (event is DrawKingdomEvent)
+    {
+      List<int> blacklistIds = await _repository.getBlacklistIds();
+      if (event.autoBlacklist && _cards != null && _cards.length > 0) {
+        blacklistIds.addAll(_cards.map((c) => c.id));
+        await _repository.setBlacklistIds(blacklistIds.toSet().toList());
+      }
+
+      _cards = await _repository.fetchCards(sets: event.setIds, limit: event.shuffleSize, shuffle: true, blacklistIds: blacklistIds);
+      if (_cards != null && _cards.length > 0)
+      {
+        _repository.saveMostRecentKingdom(_cards);
+      }
       _cards.sort((a,b) => a.name.compareTo(b.name));
       newState = KingdomBlocState(_cards, false, _sortType);
     }

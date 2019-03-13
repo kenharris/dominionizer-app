@@ -1,6 +1,15 @@
+import 'dart:convert';
+import 'dart:core';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dominionizer_app/model/card.dart';
 
 class SharedPreferencesProvider {
+  static const String BLACKLIST = 'Blacklist';
+  static const String USE_DARK_THEME = 'UseDarkTheme';
+  static const String AUTO_BLACKLIST = 'AutoBlacklist';
+  static const String SHUFFLE_SIZE = 'ShuffleSize';
+  static const String LATEST_KINGDOM = 'LatestKingdom';
+
   SharedPreferencesProvider._();
   static final SharedPreferencesProvider spp = SharedPreferencesProvider._();
 
@@ -13,23 +22,6 @@ class SharedPreferencesProvider {
     _prefs = await SharedPreferences.getInstance();
     return _prefs;
   }
-  
-  // initDB() async {
-  //   Directory documentsDirectory = await getApplicationDocumentsDirectory();
-  //   String path = join(documentsDirectory.path, "dominion.db");
-
-  //   // Only copy if the database doesn't exist
-  //   if (FileSystemEntity.typeSync(path) == FileSystemEntityType.notFound){
-  //     // Load database from asset and copy
-  //     ByteData data = await rootBundle.load(join('assets', 'dominion.db'));
-  //     List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-
-  //     // Save copied asset to documents
-  //     await new File(path).writeAsBytes(bytes);
-  //   }
-
-  //   return await openDatabase(path, version: 1, readOnly: false);
-  // }
 
   Future<bool> _getBool(String key) async {
     final p = await prefs;
@@ -51,10 +43,58 @@ class SharedPreferencesProvider {
     return p.setInt(key, val);
   }
 
-  Future<bool> getUseDarkTheme() async => await _getBool('UseDarkTheme');
-  Future<bool> getAutoBlacklist() async => await _getBool('AutoBlacklist');
-  Future<int> getShuffleSize() async => await _getInt('ShuffleSize');
-  Future<void> setUseDarkTheme(bool useDark) async => await _setBool('UseDarkTheme', useDark);
-  Future<void> setAutoBlacklist(bool autoBlacklist) async => await _setBool('AutoBlacklist', autoBlacklist);
-  Future<void> setShuffleSize(int shuffleSize) async => await _setInt('ShuffleSize', shuffleSize);
+  Future<String> _getString(String key) async {
+    final p = await prefs;
+    return p.getString(key);
+  }
+
+  Future<void> _setString(String key, String val) async {
+    final p = await prefs;
+    return p.setString(key, val);
+  }
+
+  Future<List<String>> _getStringList(String key) async {
+    final p = await prefs;
+    return p.getStringList(key);
+  }
+
+  Future<void> _setStringList(String key, List<String> value) async {
+    final p = await prefs;
+    return p.setStringList(key, value);
+  }
+
+  Future<void> saveMostRecentKingdom(List<Card> cards) async => 
+    await _setStringList(LATEST_KINGDOM, cards.map((c) => c.toJson()).toList());
+
+  Future<List<Card>> getMostRecentKingdom() async =>
+    (await _getStringList(LATEST_KINGDOM))?.map((s) => Card.fromMap(jsonDecode(s)))?.toList() ?? [];
+
+  /// TODO: if last card is removed from blacklist, remove shared pref OR check for empty string before splitting
+  Future<List<int>> getBlacklistIds() async => (await _getString(BLACKLIST))?.split('|')?.map(int.parse)?.toList() ?? [];
+  // Future<List<int>> getBlacklistIds() async {
+  //   List<int> ints = [];
+
+  //   var str = await _getString(BLACKLIST);
+  //   if (str != null && str.length > 0) {
+  //     var strs = str.split('|');
+  //     if (strs != null && strs.length > 0) {
+  //       ints = strs.map(int.parse);
+  //     }
+  //   }
+
+  //   return ints;
+  // }
+
+  Future<void> setBlacklistIds(List<int> ids) async => await _setString(BLACKLIST, ids.join("|"));
+  // Future<void> setBlacklistIds(List<int> ids) async {
+  //   var str = ids.join("|");
+  //   await _setString(BLACKLIST, str);
+  // }
+
+  Future<bool> getUseDarkTheme() async => await _getBool(USE_DARK_THEME);
+  Future<bool> getAutoBlacklist() async => await _getBool(AUTO_BLACKLIST);
+  Future<int> getShuffleSize() async => await _getInt(SHUFFLE_SIZE);
+  Future<void> setUseDarkTheme(bool useDark) async => await _setBool(USE_DARK_THEME, useDark);
+  Future<void> setAutoBlacklist(bool autoBlacklist) async => await _setBool(AUTO_BLACKLIST, autoBlacklist);
+  Future<void> setShuffleSize(int shuffleSize) async => await _setInt(SHUFFLE_SIZE, shuffleSize);
 }

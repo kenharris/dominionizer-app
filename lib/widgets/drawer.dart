@@ -1,3 +1,4 @@
+import 'package:dominionizer_app/pages/blacklist_page.dart';
 import 'package:flutter/material.dart';
 import 'package:dominionizer_app/pages.dart';
 
@@ -40,6 +41,16 @@ class _MyDrawerState extends State<MyDrawer> {
               Navigator.push(
                 context,
                 new MaterialPageRoute(builder: (ctxt) => new KingdomPage(title: "Kingdom")),
+              );
+            },
+          ),
+          ListTile(
+            title: Text('Manage Blacklist'),
+            onTap: () {
+              Navigator.of(context).pop();
+              Navigator.push(
+                context,
+                new MaterialPageRoute(builder: (ctx) => new BlacklistPage(title: "Manage Blacklist"))
               );
             },
           ),

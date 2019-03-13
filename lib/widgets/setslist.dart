@@ -1,27 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:dominionizer_app/widgets.dart';
 import 'package:dominionizer_app/model/setinfo.dart';
-import 'package:dominionizer_app/blocs/sets_event.dart';
 import 'package:dominionizer_app/blocs/sets_bloc.dart';
 
 class SetsListState extends State<SetsList> {  
-  Sink<SetsEvent> _sink;
+  SetsBloc bloc;
 
   void _toggleSelectedState (SetName id, bool included) async
   {
-    _sink.add(SetInclusionEvent(id: id,  include: included));
+    bloc.toggleIncludedState(id, included);
   }
 
   void _toggleInclusionOfAll(bool include) {
     if (include)
-      _sink.add(SetIncludeAllEvent());
+      bloc.toggleIncludedStateAllSets(true);
     else
-      _sink.add(SetExcludeAllEvent());
+      bloc.toggleIncludedStateAllSets(false);
   }
 
   @override
   Widget build (BuildContext ctxt) {
-    _sink = ServiceProviderWidget.of(context).setsBloc.setsEventSink;
+    bloc = ServiceProviderWidget.of(context);
+    bloc.initialize();
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -29,7 +29,7 @@ class SetsListState extends State<SetsList> {
       children: [
         Flexible(
           child: StreamBuilder<SetsBlocState>(
-          stream: ServiceProviderWidget.of(context).setsBloc.sets,
+          stream: ServiceProviderWidget.of(context).sets,
             builder: (BuildContext context, AsyncSnapshot<SetsBlocState> snapshot) {
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:

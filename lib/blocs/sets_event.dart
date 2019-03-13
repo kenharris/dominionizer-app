@@ -8,7 +8,7 @@ class SetInclusionEvent extends SetsEvent {
   final SetName id;
   final bool include;
 
-  SetInclusionEvent({this.id, this.include});
+  SetInclusionEvent(this.id, this.include);
 }
 
 class SetIncludeAllEvent extends SetsEvent { }

@@ -17,7 +17,6 @@ class SetsBloc {
   SetsBloc()
   {
     _setsEventController.stream.listen(_mapEventToState);
-    _setsEventController.sink.add(new SetsInitializeEvent());
   }
 
   final _repository = Repository();
@@ -26,10 +25,25 @@ class SetsBloc {
 
   SetsBlocState _state = SetsBlocState([], false);  
 
-  Sink<SetsEvent> get setsEventSink => _setsEventController.sink;
-
   Stream<SetsBlocState> get sets => _setsStateController.stream;
   SetsBlocState get state => _state;
+
+  Sink<SetsEvent> get _sink => _setsEventController.sink;
+
+  void initialize() {
+    _sink.add(SetsInitializeEvent());
+  }
+
+  void toggleIncludedState(SetName id, bool included) {
+    _sink.add(SetInclusionEvent(id, included));
+  }
+
+  void toggleIncludedStateAllSets(bool include) {
+    if (include)
+      _sink.add(SetIncludeAllEvent());
+    else
+      _sink.add(SetExcludeAllEvent());
+  }
 
   void _mapEventToState(SetsEvent event) async {
     SetsBlocState newState;
