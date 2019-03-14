@@ -15,7 +15,6 @@ class Repository {
   Future<List<Card>> fetchCards({List<int> sets, int limit, bool shuffle, List<int> blacklistIds}) => databaseProvider.getCards(sets: sets, limit: limit, sortByRandom: shuffle, blacklistIds: blacklistIds);
 
   Future<List<Card>> getBlacklistCards() async {
-    // prefs.getBlacklistIds().then((ids) => )
     var bids = await prefs.getBlacklistIds();
     var cards = await databaseProvider.getCards(idsToFetch: bids);
 

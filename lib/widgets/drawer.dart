@@ -19,9 +19,9 @@ class _MyDrawerState extends State<MyDrawer> {
         padding: EdgeInsets.zero,
         children: <Widget>[
           DrawerHeader(
-            child: Text('Drawer Header'),
+            child: Text('Drawer Header', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
             decoration: BoxDecoration(
-              color: Colors.blue,
+              color: Theme.of(context).primaryColor,
             ),
           ),
           ListTile(

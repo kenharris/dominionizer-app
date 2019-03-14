@@ -23,6 +23,11 @@ class SharedPreferencesProvider {
     return _prefs;
   }
 
+  Future<void> _remove(String key) async {
+    final p = await prefs;
+    return p.remove(key);
+  }
+
   Future<bool> _getBool(String key) async {
     final p = await prefs;
     return p.getBool(key);
@@ -69,27 +74,21 @@ class SharedPreferencesProvider {
   Future<List<Card>> getMostRecentKingdom() async =>
     (await _getStringList(LATEST_KINGDOM))?.map((s) => Card.fromMap(jsonDecode(s)))?.toList() ?? [];
 
-  /// TODO: if last card is removed from blacklist, remove shared pref OR check for empty string before splitting
-  Future<List<int>> getBlacklistIds() async => (await _getString(BLACKLIST))?.split('|')?.map(int.parse)?.toList() ?? [];
-  // Future<List<int>> getBlacklistIds() async {
-  //   List<int> ints = [];
+  Future<List<int>> getBlacklistIds() async {
+    var str = await _getString(BLACKLIST);
+    if (str != null && str.isNotEmpty) {
+      return str.split('|')?.map(int.parse)?.toList() ?? [];
+    }
 
-  //   var str = await _getString(BLACKLIST);
-  //   if (str != null && str.length > 0) {
-  //     var strs = str.split('|');
-  //     if (strs != null && strs.length > 0) {
-  //       ints = strs.map(int.parse);
-  //     }
-  //   }
+    return [];
+  }
 
-  //   return ints;
-  // }
-
-  Future<void> setBlacklistIds(List<int> ids) async => await _setString(BLACKLIST, ids.join("|"));
-  // Future<void> setBlacklistIds(List<int> ids) async {
-  //   var str = ids.join("|");
-  //   await _setString(BLACKLIST, str);
-  // }
+  Future<void> setBlacklistIds(List<int> ids) async {
+    if (ids == null || ids.length == 0) {
+      await _remove(BLACKLIST);
+    }
+    await _setString(BLACKLIST, ids.join("|"));
+  }
 
   Future<bool> getUseDarkTheme() async => await _getBool(USE_DARK_THEME);
   Future<bool> getAutoBlacklist() async => await _getBool(AUTO_BLACKLIST);

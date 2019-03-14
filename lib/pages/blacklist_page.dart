@@ -14,20 +14,45 @@ class BlacklistPageState extends State<BlacklistPage> {
   final double _kingdomCardSize = 10;
   BlacklistSortType _sortType = BlacklistSortType.CardNameAscending;
 
-  int _cardsToShuffle;
-  bool _autoBlacklist;
-
-  List<SetInfo> _sets;
+  Future<void> _confirmEmptyBlacklist() {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Empty Blacklist'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Are you sure you'),
+                Text('want to empty your blacklist?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text('OK'),
+              onPressed: () {
+                blacklistBloc.emptyBlacklist();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   void _respondToState(BlacklistState state) {
     setState(() {
       _sortType = state.sortType;
     });
-  }  
-
-  void _onAppStateChange(AppBlocState appState) {
-    _autoBlacklist = appState.autoBlacklist;
-    _cardsToShuffle = appState.cardsToShuffle;
   }
 
   // void _showDialog() {
@@ -49,26 +74,13 @@ class BlacklistPageState extends State<BlacklistPage> {
 
   @override
   Widget build (BuildContext ctxt) {
-    AppBloc appBloc = AppSettingsProvider.of(context);
-    appBloc.appStateStream.where((s) => s.autoBlacklist !=_autoBlacklist || s.cardsToShuffle !=_cardsToShuffle).listen(_onAppStateChange);
-    appBloc.initialize();
     return Scaffold(
       appBar: AppBar(
         title: Text("Blacklist Page"),
         actions: <Widget>[
-          StreamBuilder<AppBlocState>(
-            stream: appBloc.appStateStream,
-            builder: (BuildContext context, AsyncSnapshot<AppBlocState> snapshot) {
-              switch (snapshot.connectionState) {
-                case ConnectionState.waiting:
-                  return const CircularProgressIndicator();
-                default:
-                  return IconButton(
-                    icon: Icon(Icons.clear),
-                    onPressed: () {},
-                  );
-              }
-            }
+          IconButton(
+            icon: Icon(Icons.clear),
+            onPressed: () => _confirmEmptyBlacklist(),
           ),
           IconButton(
             icon: Icon(FontAwesomeIcons.sort),
@@ -104,11 +116,11 @@ class BlacklistPageState extends State<BlacklistPage> {
                             itemBuilder: (BuildContext ctxt, int index) {
                               return Dismissible(
                                 background: Container(
-                                  color: Colors.red,
+                                  color: Theme.of(context).accentColor,
                                   padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 0),
                                   child: Align(
                                     alignment: Alignment.centerRight,
-                                    child: new Icon(Icons.delete),
+                                    child: new Icon(Icons.delete, color: Theme.of(context).colorScheme.onSecondary),
                                   )
                                 ),
                                 key: Key(snapshot.data.cards[index].id.toString()),
@@ -117,7 +129,7 @@ class BlacklistPageState extends State<BlacklistPage> {
                                   Scaffold.of(context).showSnackBar(SnackBar(
                                     content: Row(
                                       children: [
-                                        Text("${snapshot.data.cards[index].name}", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+                                        Text("${snapshot.data.cards[index].name}", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary)),
                                         Text(" removed from blacklist.")
                                       ]
                                     ),
@@ -127,12 +139,12 @@ class BlacklistPageState extends State<BlacklistPage> {
                                 },
                                 direction: DismissDirection.endToStart,
                                 child: Container(
-                                  decoration: const BoxDecoration(
+                                  decoration: BoxDecoration(
                                     border:Border(
-                                      top:BorderSide(width: 1.0, color: Colors.green),
-                                      bottom:BorderSide(width: 1.0, color: Colors.green),
-                                      left:BorderSide(width: 1.0, color: Colors.green),
-                                      right:BorderSide(width: 1.0, color: Colors.green)
+                                      top:BorderSide(width: 1.0, color: Theme.of(context).colorScheme.secondary),
+                                      bottom:BorderSide(width: 1.0, color: Theme.of(context).colorScheme.secondary),
+                                      left:BorderSide(width: 1.0, color: Theme.of(context).colorScheme.secondary),
+                                      right:BorderSide(width: 1.0, color: Theme.of(context).colorScheme.secondary)
                                     )
                                   ),
                                   child: Padding(

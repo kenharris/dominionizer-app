@@ -106,9 +106,21 @@ class SettingsPageState extends State<SettingsPage> {
               ],
             ),
             FlatButton(
-              color: Colors.red,
-              child: _isDirty ? Text("Save Settings") : Text("No Changes"),
+              color: Theme.of(context).buttonTheme.colorScheme.background,
+              disabledColor: Theme.of(context).buttonTheme.colorScheme.secondary,
+              child: _isDirty 
+                ? Text("Save Settings", style: TextStyle(color: Theme.of(context).buttonTheme.colorScheme.onBackground)) 
+                : Text("No Changes", style: TextStyle(color: Theme.of(context).buttonTheme.colorScheme.onSecondary)),
               onPressed: _isDirty ? _updateAllSettings : null,
+            ),
+            Expanded(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: EdgeInsetsDirectional.only(bottom: 25),
+                  child: const Text("copyright me"),
+                )
+              ),
             ),
           ],
         )

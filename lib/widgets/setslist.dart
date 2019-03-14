@@ -50,7 +50,7 @@ class SetsListState extends State<SetsList> {
                             leading: Text("${snapshot.data.sets[index].id.index}"),
                             title: Text(
                               snapshot.data.sets[index].name, 
-                              style: snapshot.data.sets[index].included ? Theme.of(ctxt).primaryTextTheme.body1 : Theme.of(ctxt).accentTextTheme.body1,
+                              style: TextStyle(color: snapshot.data.sets[index].included ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onBackground),
                               textAlign: TextAlign.start
                             ),
                           onTap: () => _toggleSelectedState(snapshot.data.sets[index].id, !snapshot.data.sets[index].included)

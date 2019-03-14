@@ -15,6 +15,7 @@ class UnblacklistCardEvent extends BlacklistEvent {
 
   UnblacklistCardEvent(this.cardId);
 }
+class EmptyBlacklistEvent extends BlacklistEvent { }
 enum BlacklistSortType {
   CardNameAscending,
   CardNameDescending,
@@ -63,6 +64,10 @@ class BlacklistBloc {
   void sortBlacklist(BlacklistSortType bst) {
     _sink.add(SortBlacklistEvent(bst));
   }
+  
+  void emptyBlacklist() {
+    _sink.add(EmptyBlacklistEvent());
+  }
 
   void _mapEventToState(BlacklistEvent event) async {
     BlacklistState newState;
@@ -75,6 +80,11 @@ class BlacklistBloc {
       int cardId = event.cardId;
       await _repository.removeCardFromBlacklist(cardId);
       _cards = await _repository.getBlacklistCards();
+      newState = BlacklistState(_cards, _sortType);
+    }
+    else if (event is EmptyBlacklistEvent) {
+      _cards = [];
+      await _repository.setBlacklistIds([]);
       newState = BlacklistState(_cards, _sortType);
     }
     else if (event is SortBlacklistEvent) {

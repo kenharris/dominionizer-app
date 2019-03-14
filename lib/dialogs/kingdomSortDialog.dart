@@ -24,7 +24,6 @@ class _KingdomSortDialogState extends State<KingdomSortDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: Theme.of(context).dialogBackgroundColor,
       child: Container(
         height: 400,
         child: Column(

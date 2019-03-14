@@ -84,10 +84,26 @@ class KingdomPageState extends State<KingdomPage> {
               }
             }
           ),
-          IconButton(
-            icon: Icon(FontAwesomeIcons.sort),
-            onPressed: _showDialog,
-          )
+          StreamBuilder<KingdomBlocState>(
+            stream: kingdomBloc.kingdomStream,
+            builder: (BuildContext context, AsyncSnapshot<KingdomBlocState> snapshot) {
+              switch (snapshot.connectionState) {
+                default:
+                  if (snapshot.hasError)
+                    return Text('Error: ${snapshot.error}');
+                  else if (!snapshot.hasData || snapshot.data.cards.length == 0)
+                    return IconButton(
+                      icon: Icon(FontAwesomeIcons.sort),
+                      onPressed: null,
+                    );
+                  else
+                    return IconButton(
+                      icon: Icon(FontAwesomeIcons.sort),
+                      onPressed: _showDialog,
+                    );
+              }
+            }
+          ),
         ],
       ),
       drawer: new MyDrawer(),
@@ -95,7 +111,6 @@ class KingdomPageState extends State<KingdomPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              const Text("Kingdom", style: TextStyle(fontSize: 25)),
               Expanded(
                 child: StreamBuilder<KingdomBlocState>(
                   stream: kingdomBloc.kingdomStream,
@@ -106,18 +121,27 @@ class KingdomPageState extends State<KingdomPage> {
                       default:
                         if (snapshot.hasError)
                           return Text('Error: ${snapshot.error}');
+                        else if (!snapshot.hasData || snapshot.data.cards.length == 0)
+                          return Align(
+                            alignment: Alignment.center,
+                            child: const Text(
+                              "Tap the dice to\ngenerate a kingdom.", 
+                              style: TextStyle(fontSize: 36),
+                              textAlign: TextAlign.center,
+                            )
+                          );
                         else
                           return ListView.builder
                           (
                             itemCount: snapshot.data.cards.length,
                             itemBuilder: (BuildContext ctxt, int index) {
                               return Container(
-                                decoration: const BoxDecoration(
+                                decoration: BoxDecoration(
                                   border:Border(
-                                    top:BorderSide(width: 1.0, color: Colors.green),
-                                    bottom:BorderSide(width: 1.0, color: Colors.green),
-                                    left:BorderSide(width: 1.0, color: Colors.green),
-                                    right:BorderSide(width: 1.0, color: Colors.green)
+                                    top:BorderSide(width: 1.0, color: Theme.of(context).accentColor),
+                                    bottom:BorderSide(width: 1.0, color: Theme.of(context).accentColor),
+                                    left:BorderSide(width: 1.0, color: Theme.of(context).accentColor),
+                                    right:BorderSide(width: 1.0, color: Theme.of(context).accentColor)
                                   )
                                 ),
                                 child: Padding(
