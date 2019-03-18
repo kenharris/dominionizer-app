@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:dominionizer_app/widgets.dart';
 import 'package:dominionizer_app/model/setinfo.dart';
 import 'package:dominionizer_app/blocs/sets_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SetsListState extends State<SetsList> {  
   SetsBloc bloc;
@@ -9,13 +10,6 @@ class SetsListState extends State<SetsList> {
   void _toggleSelectedState (SetName id, bool included) async
   {
     bloc.toggleIncludedState(id, included);
-  }
-
-  void _toggleInclusionOfAll(bool include) {
-    if (include)
-      bloc.toggleIncludedStateAllSets(true);
-    else
-      bloc.toggleIncludedStateAllSets(false);
   }
 
   @override
@@ -44,15 +38,17 @@ class SetsListState extends State<SetsList> {
                       itemBuilder: (BuildContext ctxt, int index) {
                         return Container(
                           decoration: BoxDecoration(
-                            color: snapshot.data.sets[index].included ? Theme.of(context).primaryColor : Theme.of(context).backgroundColor,
+                            color: snapshot.data.sets[index].included ? Theme.of(context).selectedRowColor : Colors.white,
                           ),
                           child: ListTile(
-                            leading: Text("${snapshot.data.sets[index].id.index}"),
                             title: Text(
                               snapshot.data.sets[index].name, 
-                              style: TextStyle(color: snapshot.data.sets[index].included ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onBackground),
+                              style: TextStyle(color: snapshot.data.sets[index].included ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).disabledColor),
                               textAlign: TextAlign.start
                             ),
+                            trailing: snapshot.data.sets[index].included 
+                              ? Icon(FontAwesomeIcons.checkCircle, color: Theme.of(context).colorScheme.onPrimary)
+                              : null,
                           onTap: () => _toggleSelectedState(snapshot.data.sets[index].id, !snapshot.data.sets[index].included)
                           ),
                         );
@@ -61,21 +57,6 @@ class SetsListState extends State<SetsList> {
               }
             }
           )
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            FlatButton(
-              color: Theme.of(context).primaryColorDark,
-              child: const Text("Exclude All"),
-              onPressed: () => _toggleInclusionOfAll(false),
-            ),
-            FlatButton(
-              color: Theme.of(context).primaryColorLight,
-              child: const Text("Include All"),
-              onPressed: () => _toggleInclusionOfAll(true),
-            )
-          ],
         )
       ],
     );

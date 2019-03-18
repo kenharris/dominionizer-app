@@ -106,8 +106,8 @@ class SettingsPageState extends State<SettingsPage> {
               ],
             ),
             FlatButton(
-              color: Theme.of(context).buttonTheme.colorScheme.background,
-              disabledColor: Theme.of(context).buttonTheme.colorScheme.secondary,
+              color: Theme.of(context).buttonColor,
+              disabledColor: Colors.grey,
               child: _isDirty 
                 ? Text("Save Settings", style: TextStyle(color: Theme.of(context).buttonTheme.colorScheme.onBackground)) 
                 : Text("No Changes", style: TextStyle(color: Theme.of(context).buttonTheme.colorScheme.onSecondary)),

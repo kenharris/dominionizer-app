@@ -30,6 +30,15 @@ class SortKingdomEvent extends KingdomBlocEvent {
   SortKingdomEvent(this.sortType);
 }
 
+const List<String> KingdomSortTypeNames = [
+  "Card Name Ascending",
+  "Card Name Descending",
+  "Set Name Ascending",
+  "Set Name Descending",
+  "Cost Ascending",
+  "Cost Descending"
+];
+
 @immutable
 class KingdomBlocState {
   final bool isLoading;

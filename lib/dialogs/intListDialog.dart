@@ -14,7 +14,6 @@ class _IntListDialogState extends State<IntListDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: Theme.of(context).dialogBackgroundColor,
       child: Container(
         height: 400,
         child: Column(
@@ -24,12 +23,24 @@ class _IntListDialogState extends State<IntListDialog> {
                 itemCount: widget._values.length,
                 itemBuilder: (BuildContext ctxt, int index) {
                   return RadioListTile(
-                    title: Text("${widget._values[index]}"),
-                    subtitle: widget._values[index] == widget._defaultValue ? Text("Default") : null,
+                    title: Text(
+                      "${widget._values[index]}",
+                      style: TextStyle(
+                        color: (widget._values[index] == _selectedValue) ? Theme.of(context).primaryColor : Colors.grey
+                      ),
+                    ),
+                    subtitle: widget._values[index] == widget._defaultValue 
+                      ? Text(
+                          "Default",
+                          style: TextStyle(
+                            color: (widget._values[index] == _selectedValue) ? Theme.of(context).primaryColor : Colors.grey
+                          ),
+                        ) : null,
                     selected: widget._values[index] == _selectedValue,
                     onChanged: (i) => _setRadioValue(i),
                     value: widget._values[index],
                     groupValue: _selectedValue,
+                    activeColor: Theme.of(context).primaryColor
                   );
                 },
               )

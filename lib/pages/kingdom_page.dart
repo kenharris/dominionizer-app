@@ -1,6 +1,6 @@
 import 'package:dominionizer_app/blocs/app_bloc.dart';
 import 'package:dominionizer_app/blocs/sets_bloc.dart';
-import 'package:dominionizer_app/dialogs/kingdomSortDialog.dart';
+import 'package:dominionizer_app/dialogs/sortDialog.dart';
 import 'package:dominionizer_app/model/setinfo.dart';
 import 'package:dominionizer_app/widgets/app_settings.dart';
 import 'package:dominionizer_app/widgets/cardCost.dart';
@@ -13,7 +13,7 @@ class KingdomPageState extends State<KingdomPage> {
   final KingdomBloc kingdomBloc = KingdomBloc();
   final SetsBloc setsBloc = SetsBloc();
 
-  final double _kingdomCardSize = 10;
+  final double _kingdomCardSize = 14;
   KingdomSortType _sortType = KingdomSortType.CardNameAscending;
 
   int _cardsToShuffle;
@@ -42,13 +42,15 @@ class KingdomPageState extends State<KingdomPage> {
   }
 
   void _showDialog() {
-    showDialog<KingdomSortType>(
+    showDialog<int>(
       context: context,
       builder: (BuildContext context) {
-        return KingdomSortDialog(_sortType);
+        return SortDialog(_sortType.index, KingdomSortTypeNames, 400);
       }
-    ).then((kst) {
-      kingdomBloc.sortKingdom(kst);
+    ).then((sortType) {
+      if (sortType != null) {
+        kingdomBloc.sortKingdom(KingdomSortType.values[sortType]);
+      }
     });
   }
 

@@ -22,6 +22,12 @@ enum BlacklistSortType {
   SetNameAscending,
   SetNameDescending,
 }
+const List<String> BlacklistSortTypeNames = [
+  "Card Name Ascending",
+  "Card Name Descending",
+  "Set Name Ascending",
+  "Set Name Descending",
+];
 class SortBlacklistEvent extends BlacklistEvent {
   final BlacklistSortType sortType;
 

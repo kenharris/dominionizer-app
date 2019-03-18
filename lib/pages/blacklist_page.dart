@@ -1,8 +1,5 @@
-import 'package:dominionizer_app/blocs/app_bloc.dart';
 import 'package:dominionizer_app/blocs/blacklist_bloc.dart';
-import 'package:dominionizer_app/dialogs/kingdomSortDialog.dart';
-import 'package:dominionizer_app/model/setinfo.dart';
-import 'package:dominionizer_app/widgets/app_settings.dart';
+import 'package:dominionizer_app/dialogs/sortDialog.dart';
 import 'package:dominionizer_app/widgets/cardCost.dart';
 import 'package:flutter/material.dart';
 import '../widgets/drawer.dart';
@@ -11,7 +8,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 class BlacklistPageState extends State<BlacklistPage> {
   final BlacklistBloc blacklistBloc = BlacklistBloc();
 
-  final double _kingdomCardSize = 10;
+  final double _kingdomCardSize = 14;
   BlacklistSortType _sortType = BlacklistSortType.CardNameAscending;
 
   Future<void> _confirmEmptyBlacklist() {
@@ -55,16 +52,19 @@ class BlacklistPageState extends State<BlacklistPage> {
     });
   }
 
-  // void _showDialog() {
-  //   showDialog<BlacklistSortType>(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return KingdomSortDialog(_sortType);
-  //     }
-  //   ).then((bst) {
-  //     blacklistBloc.sortBlacklist(bst);
-  //   });
-  // }
+  void _showDialog() {
+    showDialog<int>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return SortDialog(_sortType.index, BlacklistSortTypeNames, 300);
+      }
+    ).then((sortValue) {
+      if (sortValue != null) {
+        blacklistBloc.sortBlacklist(BlacklistSortType.values[sortValue]);
+      }
+    });
+  }
 
   @override
   void initState() {
@@ -84,8 +84,7 @@ class BlacklistPageState extends State<BlacklistPage> {
           ),
           IconButton(
             icon: Icon(FontAwesomeIcons.sort),
-            // onPressed: _showDialog,
-            onPressed: () {},
+            onPressed: _showDialog,
           )
         ],
       ),
@@ -129,8 +128,8 @@ class BlacklistPageState extends State<BlacklistPage> {
                                   Scaffold.of(context).showSnackBar(SnackBar(
                                     content: Row(
                                       children: [
-                                        Text("${snapshot.data.cards[index].name}", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary)),
-                                        Text(" removed from blacklist.")
+                                        Text("${snapshot.data.cards[index].name}", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor)),
+                                        Text(" removed from blacklist.", style: TextStyle(color: Theme.of(context).colorScheme.primaryVariant),)
                                       ]
                                     ),
                                     backgroundColor: Theme.of(context).dialogBackgroundColor,
@@ -148,7 +147,7 @@ class BlacklistPageState extends State<BlacklistPage> {
                                     )
                                   ),
                                   child: Padding(
-                                    padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
+                                    padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
                                     child: Table(
                                       children: [
                                         TableRow(

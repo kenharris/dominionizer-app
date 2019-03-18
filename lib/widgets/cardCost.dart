@@ -11,7 +11,7 @@ class CardCost extends StatelessWidget {
   Widget build(BuildContext context) {
     List<Widget> builder = List<Widget>();
 
-    double size = 12;
+    double size = 14;
     double iconSize = 8;
     double space = 4;
     TextStyle style = TextStyle(fontSize: size);

@@ -3,9 +3,65 @@ import 'package:dominionizer_app/pages.dart';
 import 'package:dominionizer_app/widgets/app_settings.dart';
 import 'package:flutter/material.dart';
 
-class DominionizerTheme {
+// class DominionizerTheme {
+//   final ThemeData theme;
+//   final ColorScheme scheme;
+
+//   static Map<int, Color> _materialColorMap =
+//   {
+//     50:Color.fromRGBO(136,14,79, .1),
+//     100:Color.fromRGBO(136,14,79, .2),
+//     200:Color.fromRGBO(136,14,79, .3),
+//     300:Color.fromRGBO(136,14,79, .4),
+//     400:Color.fromRGBO(136,14,79, .5),
+//     500:Color.fromRGBO(136,14,79, .6),
+//     600:Color.fromRGBO(136,14,79, .7),
+//     700:Color.fromRGBO(136,14,79, .8),
+//     800:Color.fromRGBO(136,14,79, .9),
+//     900:Color.fromRGBO(136,14,79, 1),
+//   };
+
+//   DominionizerTheme(this.scheme) :
+//     theme = ThemeData.light().copyWith(
+//       colorScheme: scheme,
+//       primaryColor: scheme.primary,
+//       accentColor: scheme.primaryVariant,
+//       backgroundColor: scheme.background,
+//       selectedRowColor: scheme.primaryVariant,
+//       unselectedWidgetColor: scheme.secondaryVariant,
+//       dialogBackgroundColor: scheme.background,
+//       buttonColor: scheme.primary,
+//       toggleableActiveColor: scheme.secondary,
+//       disabledColor: scheme.background,
+//       buttonTheme: ButtonThemeData(
+//         colorScheme: scheme,
+//         disabledColor: Colors.green,
+//         buttonColor: Colors.red,
+//         highlightColor: Colors.orange,
+//         splashColor: Colors.pink
+//       )
+//     );
+// }
+
+// class PurpleTheme extends DominionizerTheme {
+//   // https://coolors.co/e4b7e5-b288c0-7e5a9b-63458a-9a48d0
+//   PurpleTheme() : super([
+//     Color(0xFF7E5A9B), // Dark lavender
+//     Color(0xFFE4B7E5), // Light orchid
+//     Color(0xFFB288C0), // African violet
+//     Color(0xFF63458A), // Cyber grape
+//     Color(0xFF9A48D0), // Dark orchid
+//   ]);  
+// }
+
+class PurpleTheme {
   final ThemeData theme;
-  final ColorScheme scheme;
+
+  static Color darkLavender = Color(0xFF7E5A9B);  // Dark lavender
+  static Color lightOrchid = Color(0xFFE4B7E5);   // Light orchid
+  static Color africanViolet = Color(0xFFB288C0); // African violet
+  static Color cyberGrape = Color(0xFF63458A);    // Cyber grape
+  static Color darkOrchid = Color(0xFF9A48D0);    // Dark orchid
 
   static Map<int, Color> _materialColorMap =
   {
@@ -21,38 +77,29 @@ class DominionizerTheme {
     900:Color.fromRGBO(136,14,79, 1),
   };
 
-  DominionizerTheme(this.scheme) :
+  // https://coolors.co/e4b7e5-b288c0-7e5a9b-63458a-9a48d0
+  PurpleTheme() : 
     theme = ThemeData.light().copyWith(
-      colorScheme: scheme,
-      primaryColor: scheme.primary,
-      accentColor: scheme.primaryVariant,
-      backgroundColor: scheme.background,
-      selectedRowColor: scheme.primaryVariant,
-      unselectedWidgetColor: scheme.secondaryVariant,
-      dialogBackgroundColor: scheme.background,
-      buttonColor: scheme.primary,
-      toggleableActiveColor: scheme.secondary,
-      disabledColor: scheme.background,
-      buttonTheme: ButtonThemeData(
-        colorScheme: scheme,
-        disabledColor: Colors.green,
-        buttonColor: Colors.red,
-        highlightColor: Colors.orange,
-        splashColor: Colors.pink
-      )
+      colorScheme: ColorScheme.fromSwatch(
+        primarySwatch: MaterialColor(cyberGrape.value, _materialColorMap),
+        accentColor: darkLavender,
+        backgroundColor: lightOrchid,
+        brightness: Brightness.light,
+        cardColor: africanViolet,
+        errorColor: Colors.red,
+        primaryColorDark: cyberGrape
+      ),
+      primaryColor: cyberGrape,
+      accentColor: darkLavender,
+      backgroundColor: lightOrchid,
+      selectedRowColor: africanViolet,
+      unselectedWidgetColor: Colors.grey,
+      dialogBackgroundColor: lightOrchid,
+      buttonColor: darkLavender,
+      toggleableActiveColor: darkOrchid,
+      disabledColor: Colors.grey,
     );
 }
-
-// class PurpleTheme extends DominionizerTheme {
-//   // https://coolors.co/e4b7e5-b288c0-7e5a9b-63458a-9a48d0
-//   PurpleTheme() : super([
-//     Color(0xFF7E5A9B), // Dark lavender
-//     Color(0xFFE4B7E5), // Light orchid
-//     Color(0xFFB288C0), // African violet
-//     Color(0xFF63458A), // Cyber grape
-//     Color(0xFF9A48D0), // Dark orchid
-//   ]);  
-// }
 
 // class OliveTheme extends DominionizerTheme {
 //   // https://coolors.co/e4b7e5-b288c0-7e5a9b-63458a-9a48d0
@@ -65,17 +112,17 @@ class DominionizerTheme {
 //   ]);  
 // }
 
-class BluesTheme extends DominionizerTheme {
-  // https://coolors.co/05668d-d0ccd0-f9fffd-605856-274156
-  BluesTheme() : super(ColorScheme.fromSwatch(
-    primarySwatch: MaterialColor(Color(0xFF05668D).value, DominionizerTheme._materialColorMap),
-    accentColor: Color(0xFF605856),
-    backgroundColor: Color(0xFFD0CCD0),
-    brightness: Brightness.light,
-    cardColor: Color(0xF9FFFD),
-    errorColor: Colors.red,
-    primaryColorDark: Color(0xFF274156)));
-}
+// class BluesTheme extends DominionizerTheme {
+//   // https://coolors.co/05668d-d0ccd0-f9fffd-605856-274156
+//   BluesTheme() : super(ColorScheme.fromSwatch(
+//     primarySwatch: MaterialColor(Color(0xFF05668D).value, DominionizerTheme._materialColorMap),
+//     accentColor: Color(0xFF605856),
+//     backgroundColor: Color(0xFFD0CCD0),
+//     brightness: Brightness.light,
+//     cardColor: Color(0xF9FFFD),
+//     errorColor: Colors.red,
+//     primaryColorDark: Color(0xFF274156)));
+// }
 
 class RandomizerWidgetState extends State<RandomizerWidget> {
   bool _isDarkTheme = false;
@@ -93,8 +140,8 @@ class RandomizerWidgetState extends State<RandomizerWidget> {
     AppSettingsProvider.of(context).appStateStream.listen(_reactToState);
     return MaterialApp(
       title: 'Flutter Demo',
-      // theme: BluesTheme().theme,
-      theme: (_isDarkTheme) ? ThemeData.dark() : ThemeData.light(),
+      theme: PurpleTheme().theme,
+      // theme: (_isDarkTheme) ? ThemeData.dark() : ThemeData.light(),
       // theme: ThemeData(
       //   // Define the default Brightness and Colors
       //   brightness: Brightness.dark,
