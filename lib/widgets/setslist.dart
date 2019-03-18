@@ -37,17 +37,17 @@ class SetsListState extends State<SetsList> {
                       itemCount: snapshot.data.sets.length,
                       itemBuilder: (BuildContext ctxt, int index) {
                         return Container(
-                          decoration: BoxDecoration(
-                            color: snapshot.data.sets[index].included ? Theme.of(context).selectedRowColor : Colors.white,
-                          ),
                           child: ListTile(
                             title: Text(
                               snapshot.data.sets[index].name, 
-                              style: TextStyle(color: snapshot.data.sets[index].included ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).disabledColor),
+                              style: TextStyle(
+                                color: snapshot.data.sets[index].included ? Theme.of(context).accentColor : Theme.of(context).disabledColor,
+                                fontWeight: snapshot.data.sets[index].included ? FontWeight.bold :FontWeight.normal,
+                              ),
                               textAlign: TextAlign.start
                             ),
-                            trailing: snapshot.data.sets[index].included 
-                              ? Icon(FontAwesomeIcons.checkCircle, color: Theme.of(context).colorScheme.onPrimary)
+                            trailing: snapshot.data.sets[index].included
+                              ? Icon(FontAwesomeIcons.checkCircle, color: Theme.of(context).accentColor)
                               : null,
                           onTap: () => _toggleSelectedState(snapshot.data.sets[index].id, !snapshot.data.sets[index].included)
                           ),

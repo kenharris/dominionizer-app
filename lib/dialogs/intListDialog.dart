@@ -23,24 +23,15 @@ class _IntListDialogState extends State<IntListDialog> {
                 itemCount: widget._values.length,
                 itemBuilder: (BuildContext ctxt, int index) {
                   return RadioListTile(
-                    title: Text(
-                      "${widget._values[index]}",
-                      style: TextStyle(
-                        color: (widget._values[index] == _selectedValue) ? Theme.of(context).primaryColor : Colors.grey
-                      ),
-                    ),
+                    title: Text("${widget._values[index]}"),
                     subtitle: widget._values[index] == widget._defaultValue 
-                      ? Text(
-                          "Default",
-                          style: TextStyle(
-                            color: (widget._values[index] == _selectedValue) ? Theme.of(context).primaryColor : Colors.grey
-                          ),
-                        ) : null,
+                      ? Text("Default")
+                      : null,
                     selected: widget._values[index] == _selectedValue,
                     onChanged: (i) => _setRadioValue(i),
                     value: widget._values[index],
                     groupValue: _selectedValue,
-                    activeColor: Theme.of(context).primaryColor
+                    activeColor: Theme.of(context).accentColor,
                   );
                 },
               )

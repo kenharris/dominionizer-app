@@ -89,28 +89,18 @@ class SettingsPageState extends State<SettingsPage> {
                   title: const Text("Auto-blacklist kingdom on new shuffle"),
                   subtitle: const Text("Play with lesser-known cards by building up a big blacklist."),
                   trailing: Checkbox(
+                    activeColor: Theme.of(context).accentColor,
                     value: _isAutoBlacklist,
                     onChanged: (b) => _setAutoBlacklist(!_isAutoBlacklist),
                   ),
                   onTap: () => _setAutoBlacklist(!_isAutoBlacklist)
                 ),
-                ListTile(
-                  title: const Text("Use dark theme"),
-                  subtitle: const Text("Join the dark side."),
-                  trailing: Checkbox(
-                    value: _isDarkTheme,
-                    onChanged: (b) => _setDarkTheme(!_isDarkTheme),
-                  ),
-                  onTap: () => _setDarkTheme(!_isDarkTheme)
-                ),
               ],
             ),
-            FlatButton(
-              color: Theme.of(context).buttonColor,
-              disabledColor: Colors.grey,
-              child: _isDirty 
-                ? Text("Save Settings", style: TextStyle(color: Theme.of(context).buttonTheme.colorScheme.onBackground)) 
-                : Text("No Changes", style: TextStyle(color: Theme.of(context).buttonTheme.colorScheme.onSecondary)),
+            RaisedButton(
+              child: _isDirty
+                ? Text("Save Settings", ) 
+                : Text("No Changes"),
               onPressed: _isDirty ? _updateAllSettings : null,
             ),
             Expanded(

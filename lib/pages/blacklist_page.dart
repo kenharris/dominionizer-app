@@ -55,7 +55,7 @@ class BlacklistPageState extends State<BlacklistPage> {
   void _showDialog() {
     showDialog<int>(
       context: context,
-      barrierDismissible: true,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return SortDialog(_sortType.index, BlacklistSortTypeNames, 300);
       }
@@ -126,26 +126,18 @@ class BlacklistPageState extends State<BlacklistPage> {
                                 onDismissed: (d) {
                                   blacklistBloc.removeCardFromBlacklist(snapshot.data.cards[index].id);
                                   Scaffold.of(context).showSnackBar(SnackBar(
+                                    backgroundColor: Theme.of(context).primaryColorLight,
                                     content: Row(
                                       children: [
-                                        Text("${snapshot.data.cards[index].name}", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor)),
-                                        Text(" removed from blacklist.", style: TextStyle(color: Theme.of(context).colorScheme.primaryVariant),)
+                                        Text("${snapshot.data.cards[index].name}", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).buttonColor)),
+                                        Text(" removed from blacklist.", style: TextStyle(color: Theme.of(context).primaryColorDark))
                                       ]
                                     ),
-                                    backgroundColor: Theme.of(context).dialogBackgroundColor,
                                     duration: const Duration(seconds: 2),
                                   ));
                                 },
                                 direction: DismissDirection.endToStart,
                                 child: Container(
-                                  decoration: BoxDecoration(
-                                    border:Border(
-                                      top:BorderSide(width: 1.0, color: Theme.of(context).colorScheme.secondary),
-                                      bottom:BorderSide(width: 1.0, color: Theme.of(context).colorScheme.secondary),
-                                      left:BorderSide(width: 1.0, color: Theme.of(context).colorScheme.secondary),
-                                      right:BorderSide(width: 1.0, color: Theme.of(context).colorScheme.secondary)
-                                    )
-                                  ),
                                   child: Padding(
                                     padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
                                     child: Table(

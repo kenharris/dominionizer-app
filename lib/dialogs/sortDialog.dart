@@ -25,17 +25,12 @@ class _SortDialogState extends State<SortDialog> {
                   itemCount: widget._strings.length,
                   itemBuilder: (BuildContext ctxt, int index) {
                     return RadioListTile(
-                      title: Text(
-                        "${widget._strings[index]}", 
-                        style: TextStyle(
-                          color: (index == _selectedValue) ? Theme.of(context).primaryColor : Colors.grey
-                        ),
-                      ),
+                      title: Text("${widget._strings[index]}"),
                       selected: index == _selectedValue,
                       onChanged: (sortValue) => _setRadioValue(sortValue),
                       value: index,
                       groupValue: _selectedValue,
-                      activeColor: Theme.of(context).primaryColor
+                      activeColor: Theme.of(context).accentColor,
                     );
                   },
                 )
@@ -46,12 +41,12 @@ class _SortDialogState extends State<SortDialog> {
                 children: <Widget>[
                   FlatButton(
                     child: const Text("Cancel"),
-                    textColor: Colors.grey,
+                    textColor: Theme.of(context).accentColor,
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   FlatButton(
                     child: const Text("OK"),
-                    textColor: Theme.of(context).primaryColor,
+                    textColor: Theme.of(context).accentColor,
                     onPressed: () { Navigator.of(context).pop(_selectedValue); },
                   )
                 ],

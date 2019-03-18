@@ -16,7 +16,7 @@ class CardCost extends StatelessWidget {
     double space = 4;
     TextStyle style = TextStyle(fontSize: size);
 
-    if (coins > 0) {
+    if (coins > 0 || (potions == 0 && debt == 0)) {
       builder.add(Text("$coins", style: style));
       builder.add(Icon(FontAwesomeIcons.coins, size: iconSize, color: Colors.yellow,));
     }

@@ -44,6 +44,7 @@ class KingdomPageState extends State<KingdomPage> {
   void _showDialog() {
     showDialog<int>(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return SortDialog(_sortType.index, KingdomSortTypeNames, 400);
       }
@@ -138,14 +139,6 @@ class KingdomPageState extends State<KingdomPage> {
                             itemCount: snapshot.data.cards.length,
                             itemBuilder: (BuildContext ctxt, int index) {
                               return Container(
-                                decoration: BoxDecoration(
-                                  border:Border(
-                                    top:BorderSide(width: 1.0, color: Theme.of(context).accentColor),
-                                    bottom:BorderSide(width: 1.0, color: Theme.of(context).accentColor),
-                                    left:BorderSide(width: 1.0, color: Theme.of(context).accentColor),
-                                    right:BorderSide(width: 1.0, color: Theme.of(context).accentColor)
-                                  )
-                                ),
                                 child: Padding(
                                   padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
                                   child: Table(

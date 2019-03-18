@@ -1,6 +1,7 @@
 import 'package:dominionizer_app/pages/blacklist_page.dart';
 import 'package:flutter/material.dart';
 import 'package:dominionizer_app/pages.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class MyDrawer extends StatefulWidget {  
   @override
@@ -19,12 +20,13 @@ class _MyDrawerState extends State<MyDrawer> {
         padding: EdgeInsets.zero,
         children: <Widget>[
           DrawerHeader(
-            child: Text('Drawer Header', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
+            child: Text('Drawer Header'),
             decoration: BoxDecoration(
               color: Theme.of(context).primaryColor,
             ),
           ),
           ListTile(
+            leading: Icon(FontAwesomeIcons.checkCircle),
             title: Text('Set Selection'),
             onTap: () {
               Navigator.of(context).pop();
@@ -35,6 +37,7 @@ class _MyDrawerState extends State<MyDrawer> {
             },
           ),
           ListTile(
+            leading: Icon(FontAwesomeIcons.crown),
             title: Text('Kingdom'),
             onTap: () {
               Navigator.of(context).pop();
@@ -45,6 +48,7 @@ class _MyDrawerState extends State<MyDrawer> {
             },
           ),
           ListTile(
+            leading: Icon(FontAwesomeIcons.solidTimesCircle),
             title: Text('Manage Blacklist'),
             onTap: () {
               Navigator.of(context).pop();
@@ -55,6 +59,7 @@ class _MyDrawerState extends State<MyDrawer> {
             },
           ),
           ListTile(
+            leading: Icon(FontAwesomeIcons.cogs),
             title: Text('Settings'),
             onTap: () {
               Navigator.of(context).pop();
