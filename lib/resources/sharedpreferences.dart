@@ -68,11 +68,11 @@ class SharedPreferencesProvider {
     return p.setStringList(key, value);
   }
 
-  Future<void> saveMostRecentKingdom(List<Card> cards) async => 
+  Future<void> saveMostRecentKingdom(List<DominionCard> cards) async => 
     await _setStringList(LATEST_KINGDOM, cards.map((c) => c.toJson()).toList());
 
-  Future<List<Card>> getMostRecentKingdom() async =>
-    (await _getStringList(LATEST_KINGDOM))?.map((s) => Card.fromMap(jsonDecode(s)))?.toList() ?? [];
+  Future<List<DominionCard>> getMostRecentKingdom() async =>
+    (await _getStringList(LATEST_KINGDOM))?.map((s) => DominionCard.fromMap(jsonDecode(s)))?.toList() ?? [];
 
   Future<List<int>> getBlacklistIds() async {
     var str = await _getString(BLACKLIST);

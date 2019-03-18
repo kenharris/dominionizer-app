@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:dominionizer_app/model/setinfo.dart';
 
-class Card {
+class DominionCard {
   int id;
   String name;
   int cardSet;
@@ -29,7 +29,7 @@ class Card {
     return jsonEncode(_map);
   }
 
-  Card.fromMap(Map<String, dynamic> map)
+  DominionCard.fromMap(Map<String, dynamic> map)
     : id = map['id'],
       name = map['name'],
       cardSet = map['set'],

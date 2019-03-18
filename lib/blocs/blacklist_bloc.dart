@@ -36,7 +36,7 @@ class SortBlacklistEvent extends BlacklistEvent {
 
 @immutable
 class BlacklistState {
-  final List<Card> cards;
+  final List<DominionCard> cards;
   final BlacklistSortType sortType;
 
   BlacklistState(this.cards, this.sortType);
@@ -54,7 +54,7 @@ class BlacklistBloc {
   final _blacklistEventController = StreamController<BlacklistEvent>();
 
   BlacklistSortType _sortType;
-  List<Card> _cards = [];
+  List<DominionCard> _cards = [];
 
   Stream<BlacklistState> get blacklistStream => _blacklistStateController.stream;
   Sink<BlacklistEvent> get _sink => _blacklistEventController.sink;

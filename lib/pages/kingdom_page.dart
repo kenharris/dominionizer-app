@@ -1,6 +1,7 @@
 import 'package:dominionizer_app/blocs/app_bloc.dart';
 import 'package:dominionizer_app/blocs/sets_bloc.dart';
 import 'package:dominionizer_app/dialogs/sortDialog.dart';
+import 'package:dominionizer_app/model/card.dart';
 import 'package:dominionizer_app/model/setinfo.dart';
 import 'package:dominionizer_app/widgets/app_settings.dart';
 import 'package:dominionizer_app/widgets/cardCost.dart';
@@ -20,11 +21,57 @@ class KingdomPageState extends State<KingdomPage> {
   bool _autoBlacklist;
 
   List<SetInfo> _sets;
+  ScaffoldState _scaffold;
 
   void _respondToState(KingdomBlocState state) {
     setState(() {
       _sortType = state.sortType;
     });
+  }
+
+  void _swapCard(DominionCard card) {
+    _scaffold = Scaffold.of(context);
+    kingdomBloc.exchangeCard(card);
+  }
+
+  void _undoSwap() {
+    kingdomBloc.undoExchange();
+  }
+
+  void _respondToSwap(SwapState state) {
+    if (state.initialCard != null && state.swappedCard != null && _scaffold != null) {
+      if (state.wasUndo) {
+        _scaffold.hideCurrentSnackBar();
+        _scaffold.showSnackBar(SnackBar(
+          backgroundColor: Theme.of(context).primaryColorLight,
+          content: Row(
+            children: [
+              Text("Card exchange undone.", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).buttonColor)),
+            ]
+          ),
+          duration: const Duration(seconds: 2),
+        ));
+      }
+      else
+      {
+        _scaffold.showSnackBar(SnackBar(
+          backgroundColor: Theme.of(context).primaryColorLight,
+          content: Row(
+            children: [
+              Text("${state.initialCard.name}", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).buttonColor)),
+              Text(" exchanged for ", style: TextStyle(color: Theme.of(context).primaryColorDark)),
+              Text("${state.swappedCard.name}", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).buttonColor)),
+              Expanded(child: Text("")),
+              GestureDetector(
+                child: Icon(FontAwesomeIcons.undo, size: 12, color: Theme.of(context).accentColor),
+                onTap: () { _undoSwap(); },
+              )
+            ]
+          ),
+          duration: const Duration(seconds: 2),
+        ));
+      }
+    }
   }
 
   void _newShuffle() {
@@ -60,6 +107,7 @@ class KingdomPageState extends State<KingdomPage> {
     kingdomBloc.kingdomStream.listen(_respondToState);
     setsBloc.sets.listen(_onSetInitialize);
     setsBloc.initialize();
+    kingdomBloc.swapStream.listen(_respondToSwap);
 
     super.initState();
   }
@@ -138,41 +186,54 @@ class KingdomPageState extends State<KingdomPage> {
                           (
                             itemCount: snapshot.data.cards.length,
                             itemBuilder: (BuildContext ctxt, int index) {
-                              return Container(
-                                child: Padding(
-                                  padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-                                  child: Table(
-                                    children: [
-                                      TableRow(
-                                        children: [
-                                          TableCell(
-                                            verticalAlignment: TableCellVerticalAlignment.top,
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  snapshot.data.cards[index].name, 
-                                                  textAlign: TextAlign.start,
-                                                  style: TextStyle(fontSize: _kingdomCardSize),
-                                                ),
-                                                CardCost(
-                                                  snapshot.data.cards[index].coins, 
-                                                  snapshot.data.cards[index].potions, 
-                                                  snapshot.data.cards[index].debt
-                                                ),
-                                              ]
-                                            ) 
-                                          ),
-                                          TableCell(
-                                            verticalAlignment: TableCellVerticalAlignment.top,
-                                            child: Text(
-                                              "${snapshot.data.cards[index].setName}",
-                                              style: TextStyle(fontSize: _kingdomCardSize),
+                              return Dismissible(
+                                background: Container(
+                                  color: Theme.of(context).accentColor,
+                                  padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 0),
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: new Icon(FontAwesomeIcons.random, color: Theme.of(context).colorScheme.onSecondary),
+                                  )
+                                ),
+                                key: Key(snapshot.data.cards[index].id.toString()),
+                                onDismissed: (d) => _swapCard(snapshot.data.cards[index]),
+                                direction: DismissDirection.endToStart,
+                                child: Container(
+                                  child: Padding(
+                                    padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
+                                    child: Table(
+                                      children: [
+                                        TableRow(
+                                          children: [
+                                            TableCell(
+                                              verticalAlignment: TableCellVerticalAlignment.top,
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    snapshot.data.cards[index].name, 
+                                                    textAlign: TextAlign.start,
+                                                    style: TextStyle(fontSize: _kingdomCardSize),
+                                                  ),
+                                                  CardCost(
+                                                    snapshot.data.cards[index].coins, 
+                                                    snapshot.data.cards[index].potions, 
+                                                    snapshot.data.cards[index].debt
+                                                  ),
+                                                ]
+                                              ) 
                                             ),
-                                          )
-                                        ]
-                                      )
-                                    ]
+                                            TableCell(
+                                              verticalAlignment: TableCellVerticalAlignment.top,
+                                              child: Text(
+                                                "${snapshot.data.cards[index].setName}",
+                                                style: TextStyle(fontSize: _kingdomCardSize),
+                                              ),
+                                            )
+                                          ]
+                                        )
+                                      ]
+                                    ),
                                   ),
                                 )
                               );

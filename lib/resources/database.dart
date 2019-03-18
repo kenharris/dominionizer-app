@@ -70,7 +70,7 @@ class DBProvider {
       return false;
   }
 
-  Future<List<Card>> getCards({List<int> sets, int limit, bool sortByRandom, List<int> blacklistIds, List<int> idsToFetch}) async {
+  Future<List<DominionCard>> getCards({List<int> sets, int limit, bool sortByRandom, List<int> blacklistIds, List<int> idsToFetch}) async {
     final db = await database;
     
     StringBuffer sb = StringBuffer();
@@ -105,10 +105,10 @@ class DBProvider {
     var res = await db.rawQuery(sb.toString());
 
     if (res.isNotEmpty) {
-      List<Card> cards = res.map((c) => Card.fromMap(c)).toList();
+      List<DominionCard> cards = res.map((c) => DominionCard.fromMap(c)).toList();
       return cards;
     } else {
-      return List<Card>();
+      return List<DominionCard>();
     }
   }
 }
