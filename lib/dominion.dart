@@ -1,5 +1,6 @@
 import 'package:dominionizer_app/blocs/app_bloc.dart';
 import 'package:dominionizer_app/pages.dart';
+import 'package:dominionizer_app/themes/light.dart';
 import 'package:dominionizer_app/themes/purple.dart';
 import 'package:dominionizer_app/widgets/app_settings.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +21,7 @@ class RandomizerWidgetState extends State<RandomizerWidget> {
     AppSettingsProvider.of(context).appStateStream.listen(_reactToState);
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: PurpleThemeData,
+      theme: _isDarkTheme ? PurpleThemeData : LightThemeData,
       home: new Scaffold(
         body: KingdomPage(title: 'Flutter Demo Home Page'),
       ),

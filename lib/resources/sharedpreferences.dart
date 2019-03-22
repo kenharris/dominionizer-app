@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:core';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:dominionizer_app/model/card.dart';
+import 'package:dominionizer_app/model/dominion_card.dart';
 
 class SharedPreferencesProvider {
   static const String BLACKLIST = 'Blacklist';

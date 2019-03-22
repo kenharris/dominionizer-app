@@ -1,13 +1,12 @@
-import '../model/setinfo.dart';
 import '../resources/repository.dart';
 import 'package:meta/meta.dart';
 import 'dart:async';
-import 'package:dominionizer_app/model/setinfo.dart';
+import 'package:dominionizer_app/model/dominion_set.dart';
 import 'package:dominionizer_app/blocs/sets_event.dart';
 
 @immutable
 class SetsBlocState {
-  final List<SetInfo> sets;
+  final List<DominionSet> sets;
   final bool isLoading;
 
   SetsBlocState(this.sets, this.isLoading);
@@ -34,7 +33,7 @@ class SetsBloc {
     _sink.add(SetsInitializeEvent());
   }
 
-  void toggleIncludedState(SetName id, bool included) {
+  void toggleIncludedState(int id, bool included) {
     _sink.add(SetInclusionEvent(id, included));
   }
 

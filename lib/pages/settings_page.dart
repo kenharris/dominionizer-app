@@ -95,6 +95,16 @@ class SettingsPageState extends State<SettingsPage> {
                   ),
                   onTap: () => _setAutoBlacklist(!_isAutoBlacklist)
                 ),
+                ListTile(
+                  title: const Text("Use dark theme"),
+                  subtitle: const Text("Join the dark side."),
+                  trailing: Checkbox(
+                    activeColor: Theme.of(context).accentColor,
+                    value: _isDarkTheme,
+                    onChanged: (b) => _setDarkTheme(!_isDarkTheme),
+                  ),
+                  onTap: () => _setDarkTheme(!_isDarkTheme)
+                ),
               ],
             ),
             RaisedButton(

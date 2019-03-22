@@ -1,4 +1,4 @@
-import '../model/card.dart';
+import '../model/dominion_card.dart';
 import '../resources/repository.dart';
 import 'package:meta/meta.dart';
 import 'dart:async';

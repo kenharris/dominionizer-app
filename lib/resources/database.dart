@@ -3,8 +3,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'dart:io';
 import 'dart:typed_data';
-import '../model/setinfo.dart';
-import '../model/card.dart';
+import '../model/dominion_set.dart';
+import '../model/dominion_card.dart';
 import 'package:flutter/services.dart';
 
 class DBProvider {
@@ -23,35 +23,32 @@ class DBProvider {
   
   initDB() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentsDirectory.path, "dominion.db");
+    String path = join(documentsDirectory.path, "dominionizer.db");
 
-    // Only copy if the database doesn't exist
-    if (FileSystemEntity.typeSync(path) == FileSystemEntityType.notFound){
-      // Load database from asset and copy
-      ByteData data = await rootBundle.load(join('assets', 'dominion.db'));
+    if (FileSystemEntity.typeSync(path) == FileSystemEntityType.notFound) {
+      ByteData data = await rootBundle.load(join('assets', 'dominionizer.db'));
       List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
 
-      // Save copied asset to documents
       await new File(path).writeAsBytes(bytes);
     }
 
     return await openDatabase(path, version: 1, readOnly: false);
   }
 
-  Future<List<SetInfo>> getSets() async {
+  Future<List<DominionSet>> getSets() async {
     final db = await database;
     var res = await db.query('sets');
     if (res.isNotEmpty) {
-      List<SetInfo> sets = res.map((s) => SetInfo.fromMap(s)).toList();
+      List<DominionSet> sets = res.map((s) => DominionSet.fromMap(s)).toList();
       return sets;
     } else {
-      return new List<SetInfo>();
+      return new List<DominionSet>();
     }
   }
 
-  Future<bool> updateSetInclusion(SetName id, bool selected) async {
+  Future<bool> updateSetInclusion(int id, bool selected) async {
     final db = await database;
-    var res = await db.update('sets', { 'included': (selected ? 1 : 0) }, where: 'id = ?', whereArgs: [id.index]);
+    var res = await db.update('sets', { 'included': (selected ? 1 : 0) }, where: 'id = ?', whereArgs: [id]);
 
     if (res >= 0) {
       return true;
@@ -74,38 +71,81 @@ class DBProvider {
     final db = await database;
     
     StringBuffer sb = StringBuffer();
-    sb.write(" SELECT * FROM cards ");
+    sb.write(" SELECT c.*, s.name as set_name FROM cards c ");
+    sb.write(" INNER JOIN cardsets cs ON cs.card_id = c.id ");
+    sb.write(" INNER JOIN sets s on cs.set_id = s.id ");
 
     List<String> whereClauses = [];
-    if (sets != null && sets.length > 0) {
-      whereClauses.add(" [set] in (${sets.map((s) => s.toString()).join(",")}) ");
-    }
-
+    whereClauses.add(" c.in_supply = 1 ");
     if (blacklistIds != null && blacklistIds.length > 0) {
-      whereClauses.add(" [id] NOT IN (${blacklistIds.join(",")}) ");
+      whereClauses.add(" c.id NOT IN (${blacklistIds.join(",")}) ");
     }
 
     if (idsToFetch != null) {
       if (idsToFetch.length > 0) {
-        whereClauses.add(" [id] IN (${idsToFetch.join(",")}) ");
+        whereClauses.add(" c.id IN (${idsToFetch.join(",")}) ");
       } else {
-        whereClauses.add(" [id] = -1 ");
+        whereClauses.add(" c.id = -1 ");
       }
+    }
+
+    if (sets != null && sets.length > 0) {      
+      whereClauses.add(" s.id in (${sets.map((s) => s.toString()).join(",")}) ");
     }
     
     if (whereClauses.length > 0) {
       sb.write(" WHERE ${whereClauses.join(" AND ")} ");
     }
 
-    if (sortByRandom != null)
-      sb.write(" ORDER BY RANDOM() ");
-    if (limit != null)
-      sb.write(" LIMIT $limit ");
-    
+    sb.write(" ORDER BY c.id ASC, s.id ASC ");
+
     var res = await db.rawQuery(sb.toString());
 
     if (res.isNotEmpty) {
       List<DominionCard> cards = res.map((c) => DominionCard.fromMap(c)).toList();
+      deduplicateCardList(cards);
+      if (sortByRandom ?? false) {
+        shuffleCardList(cards);
+      }
+      return cards.take(limit).toList();
+    } else {
+      return List<DominionCard>();
+    }
+  }
+
+  Future<List<DominionCard>> getBroughtCards(int cardId) async {
+    final db = await database;
+    
+    StringBuffer sb = StringBuffer();
+    sb.write(" SELECT c.* FROM broughtcards bc ");
+    sb.write(" INNER JOIN cards c ON c.id = bc.brought_id ");
+    sb.write(" WHERE bc.bringer_id = $cardId ");
+    sb.write(" ORDER BY c.id ");
+
+    var res = await db.rawQuery(sb.toString());
+
+    if (res.isNotEmpty) {
+      List<DominionCard> cards = res.map((c) => DominionCard.fromMap(c)).toList();
+      // deduplicateCardList(cards);
+      return cards;
+    } else {
+      return List<DominionCard>();
+    }
+  }
+
+  Future<List<DominionCard>> getCompositeCards(int cardId) async {
+    final db = await database;
+    
+    StringBuffer sb = StringBuffer();
+    sb.write(" SELECT * FROM cards c ");
+    sb.write(" INNER JOIN pilecompositions pc ON c.id = pc.card_id ");
+    sb.write(" WHERE pc.pile_id = $cardId; ");
+
+    var res = await db.rawQuery(sb.toString());
+
+    if (res.isNotEmpty) {
+      List<DominionCard> cards = res.map((c) => DominionCard.fromMap(c)).toList();
+      // deduplicateCardList(cards);
       return cards;
     } else {
       return List<DominionCard>();

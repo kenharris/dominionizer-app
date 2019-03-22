@@ -1,10 +1,12 @@
 import 'package:dominionizer_app/blocs/app_bloc.dart';
 import 'package:dominionizer_app/blocs/sets_bloc.dart';
 import 'package:dominionizer_app/dialogs/sortDialog.dart';
-import 'package:dominionizer_app/model/card.dart';
-import 'package:dominionizer_app/model/setinfo.dart';
+import 'package:dominionizer_app/model/dominion_card.dart';
+import 'package:dominionizer_app/model/dominion_set.dart';
+import 'package:dominionizer_app/pages/card_page.dart';
 import 'package:dominionizer_app/widgets/app_settings.dart';
 import 'package:dominionizer_app/widgets/cardCost.dart';
+import 'package:dominionizer_app/widgets/cardExtras.dart';
 import 'package:flutter/material.dart';
 import '../widgets/drawer.dart';
 import '../blocs/kingdom_bloc.dart';
@@ -20,7 +22,7 @@ class KingdomPageState extends State<KingdomPage> {
   int _cardsToShuffle;
   bool _autoBlacklist;
 
-  List<SetInfo> _sets;
+  List<DominionSet> _sets;
   ScaffoldState _scaffold;
 
   void _respondToState(KingdomBlocState state) {
@@ -30,7 +32,6 @@ class KingdomPageState extends State<KingdomPage> {
   }
 
   void _swapCard(DominionCard card) {
-    _scaffold = Scaffold.of(context);
     kingdomBloc.exchangeCard(card);
   }
 
@@ -43,10 +44,10 @@ class KingdomPageState extends State<KingdomPage> {
       if (state.wasUndo) {
         _scaffold.hideCurrentSnackBar();
         _scaffold.showSnackBar(SnackBar(
-          backgroundColor: Theme.of(context).primaryColorLight,
+          backgroundColor: Theme.of(context).buttonColor,
           content: Row(
             children: [
-              Text("Card exchange undone.", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).buttonColor)),
+              Text("Card exchange undone.", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).accentColor)),
             ]
           ),
           duration: const Duration(seconds: 2),
@@ -54,13 +55,14 @@ class KingdomPageState extends State<KingdomPage> {
       }
       else
       {
+        _scaffold.hideCurrentSnackBar();
         _scaffold.showSnackBar(SnackBar(
-          backgroundColor: Theme.of(context).primaryColorLight,
+          backgroundColor: Theme.of(context).buttonColor,
           content: Row(
             children: [
-              Text("${state.initialCard.name}", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).buttonColor)),
-              Text(" exchanged for ", style: TextStyle(color: Theme.of(context).primaryColorDark)),
-              Text("${state.swappedCard.name}", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).buttonColor)),
+              Text("${state.initialCard.name}", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).accentColor, decoration: TextDecoration.underline)),
+              Text(" exchanged for ", style: TextStyle(color: Theme.of(context).accentColor)),
+              Text("${state.swappedCard.name}", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).accentColor, decoration: TextDecoration.underline)),
               Expanded(child: Text("")),
               GestureDetector(
                 child: Icon(FontAwesomeIcons.undo, size: 12, color: Theme.of(context).accentColor),
@@ -75,7 +77,7 @@ class KingdomPageState extends State<KingdomPage> {
   }
 
   void _newShuffle() {
-    List<int> setIds = _sets.map((si) => si.id.index).toList();
+    List<int> setIds = _sets.map((si) => si.id).toList();
     kingdomBloc.drawNewKingdom(shuffleSize: _cardsToShuffle, autoBlacklist: _autoBlacklist, setIds: setIds);
   }
 
@@ -196,43 +198,63 @@ class KingdomPageState extends State<KingdomPage> {
                                   )
                                 ),
                                 key: Key(snapshot.data.cards[index].id.toString()),
-                                onDismissed: (d) => _swapCard(snapshot.data.cards[index]),
+                                onDismissed: (d) {
+                                  _scaffold = Scaffold.of(context);
+                                  _swapCard(snapshot.data.cards[index]);
+                                },
                                 direction: DismissDirection.endToStart,
-                                child: Container(
-                                  child: Padding(
-                                    padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-                                    child: Table(
-                                      children: [
-                                        TableRow(
-                                          children: [
-                                            TableCell(
-                                              verticalAlignment: TableCellVerticalAlignment.top,
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    snapshot.data.cards[index].name, 
-                                                    textAlign: TextAlign.start,
-                                                    style: TextStyle(fontSize: _kingdomCardSize),
-                                                  ),
-                                                  CardCost(
-                                                    snapshot.data.cards[index].coins, 
-                                                    snapshot.data.cards[index].potions, 
-                                                    snapshot.data.cards[index].debt
-                                                  ),
-                                                ]
-                                              ) 
-                                            ),
-                                            TableCell(
-                                              verticalAlignment: TableCellVerticalAlignment.top,
-                                              child: Text(
-                                                "${snapshot.data.cards[index].setName}",
-                                                style: TextStyle(fontSize: _kingdomCardSize),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      new MaterialPageRoute(builder: (ctxt) => CardPage(snapshot.data.cards[index])),
+                                    );
+                                  },
+                                  child: Container(
+                                    child: Padding(
+                                      padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
+                                      child: Table(
+                                        children: [
+                                          TableRow(
+                                            children: [
+                                              TableCell(
+                                                verticalAlignment: TableCellVerticalAlignment.top,
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      snapshot.data.cards[index].name, 
+                                                      textAlign: TextAlign.start,
+                                                      style: TextStyle(fontSize: _kingdomCardSize),
+                                                    ),
+                                                    CardCost(
+                                                      coins: snapshot.data.cards[index].coins, 
+                                                      potions: snapshot.data.cards[index].potions, 
+                                                      debt: snapshot.data.cards[index].debt
+                                                    ),
+                                                  ]
+                                                ) 
                                               ),
-                                            )
-                                          ]
-                                        )
-                                      ]
+                                              TableCell(
+                                                verticalAlignment: TableCellVerticalAlignment.top,
+                                                child: Column(
+                                                  mainAxisAlignment: MainAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      "${snapshot.data.cards[index].setName}",
+                                                      style: TextStyle(fontSize: _kingdomCardSize),
+                                                    ),
+                                                    CardExtras(
+                                                      bringsCards: snapshot.data.cards[index].bringsCards,
+                                                      isCompositePile: snapshot.data.cards[index].isCompositePile,
+                                                    )
+                                                  ]
+                                                )
+                                              )
+                                            ]
+                                          )
+                                        ]
+                                      ),
                                     ),
                                   ),
                                 )

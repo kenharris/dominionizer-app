@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:dominionizer_app/widgets.dart';
-import 'package:dominionizer_app/model/setinfo.dart';
 import 'package:dominionizer_app/blocs/sets_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SetsListState extends State<SetsList> {  
   SetsBloc bloc;
 
-  void _toggleSelectedState (SetName id, bool included) async
+  void _toggleSelectedState (int id, bool included) async
   {
     bloc.toggleIncludedState(id, included);
   }

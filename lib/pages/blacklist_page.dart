@@ -155,9 +155,9 @@ class BlacklistPageState extends State<BlacklistPage> {
                                                     style: TextStyle(fontSize: _kingdomCardSize),
                                                   ),
                                                   CardCost(
-                                                    snapshot.data.cards[index].coins, 
-                                                    snapshot.data.cards[index].potions, 
-                                                    snapshot.data.cards[index].debt
+                                                    coins: snapshot.data.cards[index].coins, 
+                                                    potions: snapshot.data.cards[index].potions, 
+                                                    debt: snapshot.data.cards[index].debt
                                                   ),
                                                 ]
                                               ) 

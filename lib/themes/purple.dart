@@ -46,19 +46,6 @@ class PurpleThemeColors {
     800: const Color(0xff472e6d),
     900: const Color(0xff351f5a)
   };
-  
-  static const Map<int, Color> gray = const <int, Color> {
-    50: const Color(0xffEBEBEC),
-    100: const Color(0xFFCECED1),
-    200: const Color(0xFFADADB2),
-    300: const Color(0xFF8C8C93),
-    400: const Color(0xFF74747B),
-    500: const Color(0xFF5B5B64),
-    600: const Color(0xFF53535C),
-    700: const Color(0xFF494952),
-    800: const Color(0xFF404048),
-    900: const Color(0xFF2F2F36)
-  };
 
   static const Map<int, Color> amber = const <int, Color> {
     50: const Color(0xFFFDF8E6),

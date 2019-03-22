@@ -4,16 +4,17 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 @immutable
 class CardCost extends StatelessWidget {
   final int coins, potions, debt;
+  final double fontSize, iconSize, space;
 
-  CardCost(this.coins, this.potions, this.debt);
+  CardCost({@required this.coins, @required this.potions, @required this.debt, this.fontSize, this.iconSize, this.space});
 
   @override
   Widget build(BuildContext context) {
     List<Widget> builder = List<Widget>();
 
-    double size = 14;
-    double iconSize = 8;
-    double space = 4;
+    double size = this.fontSize ?? 14;
+    double iconSize = this.iconSize ?? 8;
+    double space = this.space ?? 4;
     TextStyle style = TextStyle(fontSize: size);
 
     if (coins > 0 || (potions == 0 && debt == 0)) {
