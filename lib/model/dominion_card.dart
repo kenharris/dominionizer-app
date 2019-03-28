@@ -1,16 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
 
-void deduplicateCardList(List<DominionCard> input) {
-  int currentIndex = 0;
-  int listEnd = input.length;
-  while (currentIndex < listEnd) {
-    input.removeWhere((dc) => dc.id == input[currentIndex].id && dc.setName.toUpperCase() != input[currentIndex].setName.toUpperCase());
-    currentIndex++;
-    listEnd = input.length;
-  }
-}
-
 void shuffleCardList(List<DominionCard> input) {
   Random r = Random();
   DominionCard tmp;
@@ -25,8 +15,8 @@ void shuffleCardList(List<DominionCard> input) {
 class DominionCard {
   int id;
   String name;
-  String setName;
   List<String> types;
+  List<String> sets;
   int coins;
   int potions;
   int debt;
@@ -37,12 +27,13 @@ class DominionCard {
   bool bringsCards;
   
   int get totalCost => coins ?? 0 + potions ?? 0 + debt ?? 0;
+  String get setName => (sets != null && sets.length > 0) ? sets[0] : "";
 
   String toJson() {
     Map<String, dynamic> _map = {
       'id' : id,
       'name' : name,
-      'set_name' : setName,
+      'sets' : jsonEncode(sets),
       'types' : jsonEncode(types),
       'coins' : coins,
       'potions' : potions,
@@ -59,7 +50,7 @@ class DominionCard {
   DominionCard.fromJson(Map<String, dynamic> json)
     : id = json['id'],
       name = json['name'],
-      setName = json['set_name'],
+      sets = json['sets'] == null ? [] : (jsonDecode(json['sets']) as List<dynamic>).cast<String>(),
       types = json['types'] == null ? [] : (jsonDecode(json['types']) as List<dynamic>).cast<String>(),
       coins = json['coins'] ?? 0,
       potions = json['potions'] ?? 0,
@@ -73,7 +64,7 @@ class DominionCard {
   DominionCard.fromMap(Map<String, dynamic> map)
     : id = map['id'],
       name = map['name'],
-      setName = map['set_name'],
+      sets = (map['set_names'] ?? "").toString().split(","),
       types = (map['type_names'] ?? "").toString().split(","),
       coins = map['coins'] ?? 0,
       potions = map['potions'] ?? 0,

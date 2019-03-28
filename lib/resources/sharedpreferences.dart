@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'dart:core';
-import 'package:dominionizer_app/blocs/kingdom_bloc.dart';
+import 'package:dominionizer_app/blocs/states/kingdom_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:dominionizer_app/model/dominion_card.dart';
 
 class SharedPreferencesProvider {
   static const String BLACKLIST = 'Blacklist';
@@ -17,8 +16,7 @@ class SharedPreferencesProvider {
   static SharedPreferences _prefs;
 
   Future<SharedPreferences> get prefs async {
-    if (_prefs != null)
-      return _prefs;
+    if (_prefs != null) return _prefs;
 
     _prefs = await SharedPreferences.getInstance();
     return _prefs;
@@ -59,21 +57,8 @@ class SharedPreferencesProvider {
     return p.setString(key, val);
   }
 
-  Future<List<String>> _getStringList(String key) async {
-    final p = await prefs;
-    return p.getStringList(key);
-  }
-
-  Future<void> _setStringList(String key, List<String> value) async {
-    final p = await prefs;
-    return p.setStringList(key, value);
-  }
-
-  Future<void> saveMostRecentKingdom(KingdomState state) async => 
-    await _setString(LATEST_KINGDOM, state.toJson());
-
-  // Future<KingdomState> getMostRecentKingdom() async =>
-  //   KingdomState.fromJson(jsonDecode(await _getString(LATEST_KINGDOM)));
+  Future<void> saveMostRecentKingdom(KingdomState state) async =>
+      await _setString(LATEST_KINGDOM, state.toJson());  
 
   Future<KingdomState> getMostRecentKingdom() async {
     var str = await _getString(LATEST_KINGDOM);
@@ -100,7 +85,10 @@ class SharedPreferencesProvider {
   Future<bool> getUseDarkTheme() async => await _getBool(USE_DARK_THEME);
   Future<bool> getAutoBlacklist() async => await _getBool(AUTO_BLACKLIST);
   Future<int> getShuffleSize() async => await _getInt(SHUFFLE_SIZE);
-  Future<void> setUseDarkTheme(bool useDark) async => await _setBool(USE_DARK_THEME, useDark);
-  Future<void> setAutoBlacklist(bool autoBlacklist) async => await _setBool(AUTO_BLACKLIST, autoBlacklist);
-  Future<void> setShuffleSize(int shuffleSize) async => await _setInt(SHUFFLE_SIZE, shuffleSize);
+  Future<void> setUseDarkTheme(bool useDark) async =>
+      await _setBool(USE_DARK_THEME, useDark);
+  Future<void> setAutoBlacklist(bool autoBlacklist) async =>
+      await _setBool(AUTO_BLACKLIST, autoBlacklist);
+  Future<void> setShuffleSize(int shuffleSize) async =>
+      await _setInt(SHUFFLE_SIZE, shuffleSize);
 }

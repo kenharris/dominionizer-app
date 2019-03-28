@@ -1,14 +1,15 @@
-import 'package:dominionizer_app/blocs/app_bloc.dart';
+import 'package:flutter/material.dart';
+
+import 'package:dominionizer_app/blocs/settings_bloc.dart';
 import 'package:dominionizer_app/pages.dart';
 import 'package:dominionizer_app/themes/light.dart';
 import 'package:dominionizer_app/themes/purple.dart';
 import 'package:dominionizer_app/widgets/app_settings.dart';
-import 'package:flutter/material.dart';
 
 class RandomizerWidgetState extends State<RandomizerWidget> {
   bool _isDarkTheme = false;
 
-  void _reactToState(AppBlocState state) {
+  void _reactToState(SettingsState state) {
     if (state != null && _isDarkTheme != state.isDarkTheme) {
       setState(() {
         _isDarkTheme = state.isDarkTheme ?? false;

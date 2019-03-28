@@ -1,16 +1,11 @@
-import '../resources/repository.dart';
-import 'package:meta/meta.dart';
 import 'dart:async';
-import 'package:dominionizer_app/model/dominion_set.dart';
-import 'package:dominionizer_app/blocs/sets_event.dart';
 
-@immutable
-class SetsBlocState {
-  final List<DominionSet> sets;
-  final bool isLoading;
+import 'package:dominionizer_app/blocs/events/sets_events.dart';
+import 'package:dominionizer_app/blocs/states/sets_state.dart';
+import 'package:dominionizer_app/resources/repository.dart';
 
-  SetsBlocState(this.sets, this.isLoading);
-}
+export 'package:dominionizer_app/blocs/events/sets_events.dart';
+export 'package:dominionizer_app/blocs/states/sets_state.dart';
 
 class SetsBloc {
   SetsBloc()

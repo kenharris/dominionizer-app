@@ -1,5 +1,3 @@
-import 'package:dominionizer_app/model/dominion_set.dart';
-
 abstract class SetsEvent { }
 
 class SetsInitializeEvent extends SetsEvent { }

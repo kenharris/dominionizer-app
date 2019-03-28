@@ -1,6 +1,6 @@
-import 'package:dominionizer_app/blocs/carddetails_bloc.dart';
+import 'package:dominionizer_app/blocs/card_details_bloc.dart';
 import 'package:dominionizer_app/model/dominion_card.dart';
-import 'package:dominionizer_app/widgets/cardCost.dart';
+import 'package:dominionizer_app/widgets/card_cost.dart';
 import 'package:dominionizer_app/widgets/card_text.dart';
 import 'package:flutter/material.dart';
 

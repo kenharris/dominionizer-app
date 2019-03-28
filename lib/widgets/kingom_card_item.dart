@@ -1,7 +1,7 @@
 import 'package:dominionizer_app/model/dominion_card.dart';
 import 'package:dominionizer_app/pages/card_page.dart';
-import 'package:dominionizer_app/widgets/cardCost.dart';
-import 'package:dominionizer_app/widgets/cardExtras.dart';
+import 'package:dominionizer_app/widgets/card_cost.dart';
+import 'package:dominionizer_app/widgets/card_extras.dart';
 import 'package:flutter/material.dart';
 
 class KingdomCardItem extends StatelessWidget {

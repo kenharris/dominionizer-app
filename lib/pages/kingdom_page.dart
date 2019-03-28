@@ -1,13 +1,13 @@
-import 'package:dominionizer_app/blocs/app_bloc.dart';
 import 'package:dominionizer_app/blocs/sets_bloc.dart';
+import 'package:dominionizer_app/blocs/settings_bloc.dart';
 import 'package:dominionizer_app/dialogs/sortDialog.dart';
 import 'package:dominionizer_app/model/dominion_card.dart';
 import 'package:dominionizer_app/model/dominion_set.dart';
 import 'package:dominionizer_app/widgets/app_settings.dart';
 import 'package:dominionizer_app/widgets/kingom_card_item.dart';
 import 'package:flutter/material.dart';
-import '../widgets/drawer.dart';
-import '../blocs/kingdom_bloc.dart';
+import 'package:dominionizer_app/widgets/drawer.dart';
+import 'package:dominionizer_app/blocs/kingdom_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class KingdomPageState extends State<KingdomPage> {
@@ -120,7 +120,7 @@ class KingdomPageState extends State<KingdomPage> {
     _sets = setsState.sets.where((s) => s.included).toList();
   }
 
-  void _onAppStateChange(AppBlocState appState) {
+  void _onAppStateChange(SettingsState appState) {
     _autoBlacklist = appState.autoBlacklist;
     _cardsToShuffle = appState.cardsToShuffle;
   }
@@ -151,16 +151,16 @@ class KingdomPageState extends State<KingdomPage> {
 
   @override
   Widget build (BuildContext ctxt) {
-    AppBloc appBloc = AppSettingsProvider.of(context);
+    SettingsBloc appBloc = AppSettingsProvider.of(context);
     appBloc.appStateStream.where((s) => s.autoBlacklist !=_autoBlacklist || s.cardsToShuffle !=_cardsToShuffle).listen(_onAppStateChange);
     appBloc.initialize();
     return Scaffold(
       appBar: AppBar(
         title: Text("Kingdom Page"),
         actions: <Widget>[
-          StreamBuilder<AppBlocState>(
+          StreamBuilder<SettingsState>(
             stream: appBloc.appStateStream,
-            builder: (BuildContext context, AsyncSnapshot<AppBlocState> snapshot) {
+            builder: (BuildContext context, AsyncSnapshot<SettingsState> snapshot) {
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
                   return const CircularProgressIndicator();
