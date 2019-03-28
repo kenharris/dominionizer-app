@@ -58,7 +58,7 @@ class SharedPreferencesProvider {
   }
 
   Future<void> saveMostRecentKingdom(KingdomState state) async =>
-      await _setString(LATEST_KINGDOM, state.toJson());  
+      await _setString(LATEST_KINGDOM, state.toJson());
 
   Future<KingdomState> getMostRecentKingdom() async {
     var str = await _getString(LATEST_KINGDOM);
