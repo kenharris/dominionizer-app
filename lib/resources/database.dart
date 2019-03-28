@@ -14,20 +14,21 @@ class DBProvider {
   static Database _database;
 
   Future<Database> get database async {
-    if (_database != null)
-      return _database;
+    if (_database != null) return _database;
 
     _database = await initDB();
     return _database;
   }
-  
+
   initDB() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentsDirectory.path, "dominionizer-includes-blacklist.db");
+    String path =
+        join(documentsDirectory.path, "dominionizer-includes-blacklist.db");
 
     if (FileSystemEntity.typeSync(path) == FileSystemEntityType.notFound) {
       ByteData data = await rootBundle.load(join('assets', 'dominionizer.db'));
-      List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+      List<int> bytes =
+          data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
 
       await new File(path).writeAsBytes(bytes);
     }
@@ -51,7 +52,8 @@ class DBProvider {
 
   Future<bool> updateSetInclusion(int id, bool selected) async {
     final db = await database;
-    var res = await db.update('sets', { 'included': (selected ? 1 : 0) }, where: 'id = ?', whereArgs: [id]);
+    var res = await db.update('sets', {'included': (selected ? 1 : 0)},
+        where: 'id = ?', whereArgs: [id]);
 
     if (res >= 0) {
       return true;
@@ -62,7 +64,7 @@ class DBProvider {
 
   Future<bool> updateAllSetsInclusion(bool included) async {
     final db = await database;
-    var res = await db.update('sets', { 'included': (included ? 1 : 0) });
+    var res = await db.update('sets', {'included': (included ? 1 : 0)});
 
     if (res >= 0)
       return true;
@@ -70,13 +72,16 @@ class DBProvider {
       return false;
   }
 
-  Future<List<DominionCard>> _getCards(List<String> whereClauses, String orderBy, int limit) async {
+  Future<List<DominionCard>> _getCards(
+      List<String> whereClauses, String orderBy, int limit) async {
     final db = await database;
 
     StringBuffer sb = StringBuffer();
     sb.write(" SELECT c.*, ");
-    sb.write(" (select group_concat(name) from sets s inner join cardsets cs on cs.set_id = s.id where cs.card_id = c.id) as set_names, ");
-    sb.write(" (select group_concat(name) from types t inner join cardtypes ct on ct.type_id = t.id where ct.card_id = c.id) as type_names ");
+    sb.write(
+        " (select group_concat(name) from sets s inner join cardsets cs on cs.set_id = s.id where cs.card_id = c.id) as set_names, ");
+    sb.write(
+        " (select group_concat(name) from types t inner join cardtypes ct on ct.type_id = t.id where ct.card_id = c.id) as type_names ");
     sb.write(" FROM cards c ");
 
     if (whereClauses != null && whereClauses.length > 0) {
@@ -94,37 +99,42 @@ class DBProvider {
     var res = await db.rawQuery(sb.toString());
 
     if (res.isNotEmpty) {
-      List<DominionCard> cards = res.map((c) => DominionCard.fromMap(c)).toList();
+      List<DominionCard> cards =
+          res.map((c) => DominionCard.fromMap(c)).toList();
       return cards;
     } else {
       return List<DominionCard>();
     }
   }
-  
-  Future<List<DominionCard>> drawKingdomCards(List<int> setsToInclude, int numberOfCards) async {
+
+  Future<List<DominionCard>> drawKingdomCards(
+      List<int> setsToInclude, int numberOfCards) async {
     List<String> whereClauses = [];
-    
+
     whereClauses.add(" c.in_supply = 1 ");
     whereClauses.add(" c.blacklisted = 0 ");
 
     if (setsToInclude != null && setsToInclude.length > 0) {
-      whereClauses.add(" c.id IN (SELECT cards.id FROM sets INNER JOIN cardsets ON sets.id = cardsets.set_id INNER JOIN cards ON cards.id = cardsets.card_id WHERE sets.id IN (${setsToInclude.join(",")})) ");
+      whereClauses.add(
+          " c.id IN (SELECT cards.id FROM sets INNER JOIN cardsets ON sets.id = cardsets.set_id INNER JOIN cards ON cards.id = cardsets.card_id WHERE sets.id IN (${setsToInclude.join(",")})) ");
     }
-    
+
     return await _getCards(whereClauses, "RANDOM()", numberOfCards);
   }
 
-  Future<DominionCard> getReplacementKingdomCard(List<int> cardIds, List<int> setsToInclude) async {
+  Future<DominionCard> getReplacementKingdomCard(
+      List<int> cardIds, List<int> setsToInclude) async {
     List<String> whereClauses = [];
-    
+
     whereClauses.add(" c.in_supply = 1 ");
     whereClauses.add(" c.blacklisted = 0 ");
     whereClauses.add(" c.id NOT IN (${cardIds.join(",")}) ");
 
     if (setsToInclude != null && setsToInclude.length > 0) {
-      whereClauses.add(" c.id IN (SELECT cards.id FROM sets INNER JOIN cardsets ON sets.id = cardsets.set_id INNER JOIN cards ON cards.id = cardsets.card_id WHERE sets.id IN (${setsToInclude.join(",")})) ");
+      whereClauses.add(
+          " c.id IN (SELECT cards.id FROM sets INNER JOIN cardsets ON sets.id = cardsets.set_id INNER JOIN cards ON cards.id = cardsets.card_id WHERE sets.id IN (${setsToInclude.join(",")})) ");
     }
-    
+
     var cards = await _getCards(whereClauses, "RANDOM()", 1);
     return cards.first;
   }
@@ -135,21 +145,23 @@ class DBProvider {
 
   Future<List<DominionCard>> getBroughtCards(List<int> cardIds) async {
     final db = await database;
-    
+
     StringBuffer sb = StringBuffer();
     sb.write(" SELECT c.*, ");
-    sb.write(" (select group_concat(name) from sets s inner join cardsets cs on cs.set_id = s.id where cs.card_id = c.id) as set_names, ");
-    sb.write(" (select group_concat(name) from types t inner join cardtypes ct on ct.type_id = t.id where ct.card_id = c.id) as type_names ");
+    sb.write(
+        " (select group_concat(name) from sets s inner join cardsets cs on cs.set_id = s.id where cs.card_id = c.id) as set_names, ");
+    sb.write(
+        " (select group_concat(name) from types t inner join cardtypes ct on ct.type_id = t.id where ct.card_id = c.id) as type_names ");
     sb.write(" FROM broughtcards bc ");
     sb.write(" INNER JOIN cards c ON c.id = bc.brought_id ");
-    sb.write(" WHERE bc.bringer_id IN (${cardIds.map((cid) => "?").join(",")}) ");
+    sb.write(
+        " WHERE bc.bringer_id IN (${cardIds.map((cid) => "?").join(",")}) ");
     sb.write(" ORDER BY c.id ");
 
     var res = await db.rawQuery(sb.toString(), cardIds);
 
     if (res.isNotEmpty) {
-      List<DominionCard> cards = res.map((c) => DominionCard.fromMap(c)).toList();
-      return cards;
+      return res.map((c) => DominionCard.fromMap(c)).toList();
     } else {
       return List<DominionCard>();
     }
@@ -157,11 +169,13 @@ class DBProvider {
 
   Future<List<DominionCard>> getCompositeCards(int cardId) async {
     final db = await database;
-    
+
     StringBuffer sb = StringBuffer();
     sb.write(" SELECT c.*, ");
-    sb.write(" (select group_concat(name) from sets s inner join cardsets cs on cs.set_id = s.id where cs.card_id = c.id) as set_names, ");
-    sb.write(" (select group_concat(name) from types t inner join cardtypes ct on ct.type_id = t.id where ct.card_id = c.id) as type_names ");
+    sb.write(
+        " (select group_concat(name) from sets s inner join cardsets cs on cs.set_id = s.id where cs.card_id = c.id) as set_names, ");
+    sb.write(
+        " (select group_concat(name) from types t inner join cardtypes ct on ct.type_id = t.id where ct.card_id = c.id) as type_names ");
     sb.write(" FROM pilecompositions pc ");
     sb.write(" INNER JOIN cards c ON c.id = pc.card_id ");
     sb.write(" WHERE pc.pile_id = ?; ");
@@ -169,14 +183,16 @@ class DBProvider {
     var res = await db.rawQuery(sb.toString(), [cardId]);
 
     if (res.isNotEmpty) {
-      List<DominionCard> cards = res.map((c) => DominionCard.fromMap(c)).toList();
+      List<DominionCard> cards =
+          res.map((c) => DominionCard.fromMap(c)).toList();
       return cards;
     } else {
       return List<DominionCard>();
     }
   }
 
-  Future<List<DominionCard>> getEventsLandmarksAndProjects(int limit, bool events, bool landmarks, bool projects) async {
+  Future<List<DominionCard>> getEventsLandmarksAndProjects(
+      int limit, bool events, bool landmarks, bool projects) async {
     final db = await database;
 
     List<String> types = [];
@@ -198,8 +214,10 @@ class DBProvider {
 
     StringBuffer sb = StringBuffer();
     sb.write(" SELECT c.*, ");
-    sb.write(" (select group_concat(name) from sets s inner join cardsets cs on cs.set_id = s.id where cs.card_id = c.id) as set_names, ");
-    sb.write(" (select group_concat(name) from types t inner join cardtypes ct on ct.type_id = t.id where ct.card_id = c.id) as type_names ");
+    sb.write(
+        " (select group_concat(name) from sets s inner join cardsets cs on cs.set_id = s.id where cs.card_id = c.id) as set_names, ");
+    sb.write(
+        " (select group_concat(name) from types t inner join cardtypes ct on ct.type_id = t.id where ct.card_id = c.id) as type_names ");
     sb.write(" FROM cards c ");
     sb.write(" WHERE c.id IN ");
     sb.write("  (SELECT cards.id FROM types ");
@@ -216,7 +234,8 @@ class DBProvider {
     var res = await db.rawQuery(sb.toString(), params);
 
     if (res.isNotEmpty) {
-      List<DominionCard> cards = res.map((c) => DominionCard.fromMap(c)).toList();
+      List<DominionCard> cards =
+          res.map((c) => DominionCard.fromMap(c)).toList();
       return cards;
     } else {
       return List<DominionCard>();
@@ -224,8 +243,8 @@ class DBProvider {
   }
 
   Future clearBlacklist() async {
-  final db = await database;
-    
+    final db = await database;
+
     StringBuffer sb = StringBuffer();
     sb.write(" UPDATE cards ");
     sb.write(" SET blacklisted = 0 ");
@@ -235,7 +254,7 @@ class DBProvider {
 
   Future unblacklistCards(List<int> cardIds) async {
     final db = await database;
-    
+
     StringBuffer sb = StringBuffer();
     sb.write(" UPDATE cards ");
     sb.write(" SET blacklisted = 0 ");
@@ -246,7 +265,7 @@ class DBProvider {
 
   Future blacklistCards(List<int> cardIds) async {
     final db = await database;
-    
+
     StringBuffer sb = StringBuffer();
     sb.write(" UPDATE cards ");
     sb.write(" SET blacklisted = 1 ");
