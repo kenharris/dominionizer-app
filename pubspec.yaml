@@ -42,7 +42,6 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/dominion.db
     - assets/dominionizer.db
 
   # To add assets to your application, add an assets section, like this:

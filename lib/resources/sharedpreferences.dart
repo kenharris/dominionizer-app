@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:core';
+import 'package:dominionizer_app/blocs/kingdom_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dominionizer_app/model/dominion_card.dart';
 
@@ -68,11 +69,17 @@ class SharedPreferencesProvider {
     return p.setStringList(key, value);
   }
 
-  Future<void> saveMostRecentKingdom(List<DominionCard> cards) async => 
-    await _setStringList(LATEST_KINGDOM, cards.map((c) => c.toJson()).toList());
+  Future<void> saveMostRecentKingdom(KingdomState state) async => 
+    await _setString(LATEST_KINGDOM, state.toJson());
 
-  Future<List<DominionCard>> getMostRecentKingdom() async =>
-    (await _getStringList(LATEST_KINGDOM))?.map((s) => DominionCard.fromMap(jsonDecode(s)))?.toList() ?? [];
+  // Future<KingdomState> getMostRecentKingdom() async =>
+  //   KingdomState.fromJson(jsonDecode(await _getString(LATEST_KINGDOM)));
+
+  Future<KingdomState> getMostRecentKingdom() async {
+    var str = await _getString(LATEST_KINGDOM);
+    var decoded = jsonDecode(str ?? "{}");
+    return KingdomState.fromJson(decoded);
+  }
 
   Future<List<int>> getBlacklistIds() async {
     var str = await _getString(BLACKLIST);

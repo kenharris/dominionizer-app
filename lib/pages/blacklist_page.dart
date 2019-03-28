@@ -157,7 +157,8 @@ class BlacklistPageState extends State<BlacklistPage> {
                                                   CardCost(
                                                     coins: snapshot.data.cards[index].coins, 
                                                     potions: snapshot.data.cards[index].potions, 
-                                                    debt: snapshot.data.cards[index].debt
+                                                    debt: snapshot.data.cards[index].debt,
+                                                    compositePile: snapshot.data.cards[index].isCompositePile,
                                                   ),
                                                 ]
                                               ) 

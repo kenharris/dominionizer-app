@@ -57,7 +57,7 @@ class CardDetailsBloc {
       newState = CardDetailsState(_constituentCards, _broughtCards);
     }
     else if (event is BroughtCardsEvent) {
-      _broughtCards = await _repository.getBroughtCards(event.cardId);
+      _broughtCards = await _repository.getBroughtCards([event.cardId]);
       newState = CardDetailsState(_constituentCards, _broughtCards);
     }
 

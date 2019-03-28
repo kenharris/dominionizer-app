@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:dominionizer_app/widgets/hexagon_border.dart';
 
 @immutable
 class CardCost extends StatelessWidget {
   final int coins, potions, debt;
-  final double fontSize, iconSize, space;
+  final double fontSize, iconSize, space, width;
+  final bool compositePile, broughtCard;
 
-  CardCost({@required this.coins, @required this.potions, @required this.debt, this.fontSize, this.iconSize, this.space});
+  CardCost({@required this.coins, @required this.potions, @required this.debt, this.width, this.compositePile = false, this.broughtCard = false, this.fontSize, this.iconSize, this.space});
 
   @override
   Widget build(BuildContext context) {
@@ -15,31 +17,67 @@ class CardCost extends StatelessWidget {
     double size = this.fontSize ?? 14;
     double iconSize = this.iconSize ?? 8;
     double space = this.space ?? 4;
-    TextStyle style = TextStyle(fontSize: size);
 
-    if (coins > 0 || (potions == 0 && debt == 0)) {
-      builder.add(Text("$coins", style: style));
-      builder.add(Icon(FontAwesomeIcons.coins, size: iconSize, color: Colors.yellow,));
-    }
+    TextStyle lightStyle = TextStyle(fontSize: size, color: Colors.black);
+    TextStyle darkStyle = TextStyle(fontSize: size, color: Colors.white);
 
-    if (potions > 0) {
-      if (coins > 0)
-        builder.add(SizedBox(width: space));
-
-      if (potions > 1) {
-        builder.add(Text("$potions", style: style));
+    if (!compositePile && !broughtCard) {
+      if (coins > 0 || (potions == 0 && debt == 0)) {
+        builder.add(Container(
+          decoration: BoxDecoration(
+            color: Colors.yellow,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: Colors.grey
+            )
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(2.0),
+            child: Text("$coins", style: lightStyle),
+          )
+        ));
       }
-      builder.add(Icon(FontAwesomeIcons.flask, size: iconSize, color: Colors.blue));
+
+      if (potions > 0) {
+        if (coins > 0)
+          builder.add(SizedBox(width: space));
+
+        if (potions > 1) {
+          builder.add(Text("$potions", style: lightStyle));
+        }
+        builder.add(Icon(FontAwesomeIcons.flask, size: iconSize, color: Colors.blue));
+      }
+
+      if (debt > 0) {
+        if (coins > 0 || potions > 0)
+          builder.add(SizedBox(width: space));
+
+        builder.add(
+          Container(
+            decoration: ShapeDecoration(
+              shape: HexagonBorder(),
+              color: Colors.brown,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(4.0, 2.0, 4.0, 2.0),
+              child: Text("$debt", style: darkStyle),
+            ),
+          )
+        );
+      }
+    } else {
+      builder.add(Text(""));
     }
 
-    if (debt > 0) {
-      if (coins > 0 || potions > 0)
-        builder.add(SizedBox(width: space));
-
-      builder.add(Text("$debt", style: style));
-      builder.add(Icon(FontAwesomeIcons.drawPolygon, size: iconSize));
+    if (width != null) {
+      return Container(
+        width: width,
+        child: Row(
+          children: builder.toList(),
+        )
+      );
     }
-
+    
     return Row(
       children: builder.toList(),
     );

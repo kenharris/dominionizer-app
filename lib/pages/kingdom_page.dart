@@ -3,10 +3,8 @@ import 'package:dominionizer_app/blocs/sets_bloc.dart';
 import 'package:dominionizer_app/dialogs/sortDialog.dart';
 import 'package:dominionizer_app/model/dominion_card.dart';
 import 'package:dominionizer_app/model/dominion_set.dart';
-import 'package:dominionizer_app/pages/card_page.dart';
 import 'package:dominionizer_app/widgets/app_settings.dart';
-import 'package:dominionizer_app/widgets/cardCost.dart';
-import 'package:dominionizer_app/widgets/cardExtras.dart';
+import 'package:dominionizer_app/widgets/kingom_card_item.dart';
 import 'package:flutter/material.dart';
 import '../widgets/drawer.dart';
 import '../blocs/kingdom_bloc.dart';
@@ -16,7 +14,6 @@ class KingdomPageState extends State<KingdomPage> {
   final KingdomBloc kingdomBloc = KingdomBloc();
   final SetsBloc setsBloc = SetsBloc();
 
-  final double _kingdomCardSize = 14;
   KingdomSortType _sortType = KingdomSortType.CardNameAscending;
 
   int _cardsToShuffle;
@@ -25,14 +22,14 @@ class KingdomPageState extends State<KingdomPage> {
   List<DominionSet> _sets;
   ScaffoldState _scaffold;
 
-  void _respondToState(KingdomBlocState state) {
+  void _respondToState(KingdomState state) {
     setState(() {
       _sortType = state.sortType;
     });
   }
 
   void _swapCard(DominionCard card) {
-    kingdomBloc.exchangeCard(card);
+    kingdomBloc.exchangeCard(card, _sets.map((ds) => ds.id).toList());
   }
 
   void _undoSwap() {
@@ -47,7 +44,12 @@ class KingdomPageState extends State<KingdomPage> {
           backgroundColor: Theme.of(context).buttonColor,
           content: Row(
             children: [
-              Text("Card exchange undone.", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).accentColor)),
+              Text("Card exchange undone.", 
+                style: TextStyle(
+                  fontWeight: FontWeight.bold, 
+                  color: Theme.of(context).accentColor
+                )
+              ),
             ]
           ),
           duration: const Duration(seconds: 2),
@@ -59,14 +61,47 @@ class KingdomPageState extends State<KingdomPage> {
         _scaffold.showSnackBar(SnackBar(
           backgroundColor: Theme.of(context).buttonColor,
           content: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text("${state.initialCard.name}", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).accentColor, decoration: TextDecoration.underline)),
-              Text(" exchanged for ", style: TextStyle(color: Theme.of(context).accentColor)),
-              Text("${state.swappedCard.name}", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).accentColor, decoration: TextDecoration.underline)),
-              Expanded(child: Text("")),
-              GestureDetector(
-                child: Icon(FontAwesomeIcons.undo, size: 12, color: Theme.of(context).accentColor),
-                onTap: () { _undoSwap(); },
+              Flexible(
+                flex: 0,
+                child: Text("${state.initialCard.name}",
+                  softWrap: true,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).accentColor,
+                    decoration: TextDecoration.underline
+                  )
+                )
+              ),
+              Expanded(
+                child: Icon(FontAwesomeIcons.longArrowAltRight,
+                  size: 18,
+                  color: Theme.of(context).accentColor,
+                ),
+              ),
+              Flexible(
+                flex: 1,
+                child: Text("${state.swappedCard.name}",
+                  softWrap: true,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold, 
+                    color: Theme.of(context).accentColor, 
+                    decoration: TextDecoration.underline
+                  )
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: GestureDetector(
+                  child: Icon(FontAwesomeIcons.undo, size: 12, color: Theme.of(context).accentColor),
+                  onTap: () { _undoSwap(); },
+                ),
               )
             ]
           ),
@@ -95,7 +130,7 @@ class KingdomPageState extends State<KingdomPage> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return SortDialog(_sortType.index, KingdomSortTypeNames, 400);
+        return SortDialog(_sortType?.index ?? KingdomSortType.CardNameAscending, KingdomSortTypeNames, 400);
       }
     ).then((sortType) {
       if (sortType != null) {
@@ -137,9 +172,9 @@ class KingdomPageState extends State<KingdomPage> {
               }
             }
           ),
-          StreamBuilder<KingdomBlocState>(
+          StreamBuilder<KingdomState>(
             stream: kingdomBloc.kingdomStream,
-            builder: (BuildContext context, AsyncSnapshot<KingdomBlocState> snapshot) {
+            builder: (BuildContext context, AsyncSnapshot<KingdomState> snapshot) {
               switch (snapshot.connectionState) {
                 default:
                   if (snapshot.hasError)
@@ -165,16 +200,16 @@ class KingdomPageState extends State<KingdomPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Expanded(
-                child: StreamBuilder<KingdomBlocState>(
+                child: StreamBuilder<KingdomState>(
                   stream: kingdomBloc.kingdomStream,
-                  builder: (BuildContext context, AsyncSnapshot<KingdomBlocState> snapshot) {
+                  builder: (BuildContext context, AsyncSnapshot<KingdomState> snapshot) {
                     switch (snapshot.connectionState) {
                       case ConnectionState.waiting:
                         return const CircularProgressIndicator();
                       default:
                         if (snapshot.hasError)
                           return Text('Error: ${snapshot.error}');
-                        else if (!snapshot.hasData || snapshot.data.cards.length == 0)
+                        else if (!snapshot.hasData || snapshot.data.totalCards == 0)
                           return Align(
                             alignment: Alignment.center,
                             child: const Text(
@@ -186,79 +221,44 @@ class KingdomPageState extends State<KingdomPage> {
                         else
                           return ListView.builder
                           (
-                            itemCount: snapshot.data.cards.length,
+                            itemCount: snapshot.data.totalCards,
                             itemBuilder: (BuildContext ctxt, int index) {
-                              return Dismissible(
-                                background: Container(
-                                  color: Theme.of(context).accentColor,
-                                  padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 0),
-                                  child: Align(
-                                    alignment: Alignment.centerRight,
-                                    child: new Icon(FontAwesomeIcons.random, color: Theme.of(context).colorScheme.onSecondary),
-                                  )
-                                ),
-                                key: Key(snapshot.data.cards[index].id.toString()),
-                                onDismissed: (d) {
-                                  _scaffold = Scaffold.of(context);
-                                  _swapCard(snapshot.data.cards[index]);
-                                },
-                                direction: DismissDirection.endToStart,
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      new MaterialPageRoute(builder: (ctxt) => CardPage(snapshot.data.cards[index])),
-                                    );
-                                  },
-                                  child: Container(
-                                    child: Padding(
-                                      padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-                                      child: Table(
-                                        children: [
-                                          TableRow(
-                                            children: [
-                                              TableCell(
-                                                verticalAlignment: TableCellVerticalAlignment.top,
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      snapshot.data.cards[index].name, 
-                                                      textAlign: TextAlign.start,
-                                                      style: TextStyle(fontSize: _kingdomCardSize),
-                                                    ),
-                                                    CardCost(
-                                                      coins: snapshot.data.cards[index].coins, 
-                                                      potions: snapshot.data.cards[index].potions, 
-                                                      debt: snapshot.data.cards[index].debt
-                                                    ),
-                                                  ]
-                                                ) 
-                                              ),
-                                              TableCell(
-                                                verticalAlignment: TableCellVerticalAlignment.top,
-                                                child: Column(
-                                                  mainAxisAlignment: MainAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      "${snapshot.data.cards[index].setName}",
-                                                      style: TextStyle(fontSize: _kingdomCardSize),
-                                                    ),
-                                                    CardExtras(
-                                                      bringsCards: snapshot.data.cards[index].bringsCards,
-                                                      isCompositePile: snapshot.data.cards[index].isCompositePile,
-                                                    )
-                                                  ]
-                                                )
-                                              )
-                                            ]
-                                          )
-                                        ]
-                                      ),
-                                    ),
+                              if (index < snapshot.data.numberOfKingdomCards) {
+                                return Dismissible(
+                                  background: Container(
+                                    color: Theme.of(context).accentColor,
+                                    padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 0),
+                                    child: Align(
+                                      alignment: Alignment.centerRight,
+                                      child: new Icon(FontAwesomeIcons.random, color: Theme.of(context).colorScheme.onSecondary),
+                                    )
                                   ),
-                                )
-                              );
+                                  key: Key(snapshot.data.cards[index].id.toString()),
+                                  onDismissed: (d) {
+                                    _scaffold = Scaffold.of(context);
+                                    _swapCard(snapshot.data.cards[index]);
+                                  },
+                                  direction: DismissDirection.endToStart,
+                                  child: KingdomCardItem(
+                                    card: snapshot.data.cards[index],
+                                    isBroughtCard: false,
+                                    topBorder: false
+                                  )
+                                );
+                              } else if (index >= snapshot.data.numberOfKingdomCards && index < (snapshot.data.numberOfKingdomCards + snapshot.data.numberOfBroughtCards)) {
+                                return KingdomCardItem(
+                                  card: snapshot.data.broughtCards[index - snapshot.data.numberOfKingdomCards],
+                                  isBroughtCard: true,
+                                  topBorder: index == snapshot.data.numberOfKingdomCards,
+                                );
+                              } else {
+                                // Events, Landmarks, and Projects
+                                return KingdomCardItem(
+                                  card: snapshot.data.eventsLandmarksProjects[index - snapshot.data.numberOfKingdomCards - snapshot.data.numberOfBroughtCards],
+                                  isEventProjectOrLandmark: true,
+                                  topBorder: index == (snapshot.data.numberOfKingdomCards + snapshot.data.numberOfBroughtCards),
+                                );
+                              }
                             }
                           );
                     }

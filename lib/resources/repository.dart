@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:dominionizer_app/blocs/kingdom_bloc.dart';
+
 import 'database.dart';
 import 'sharedpreferences.dart';
 
@@ -14,7 +16,8 @@ class Repository {
   Future updateAllSetsInclusion(bool included) => databaseProvider.updateAllSetsInclusion(included);
   Future<List<DominionCard>> fetchCards({List<int> sets, int limit, bool shuffle, List<int> blacklistIds}) => databaseProvider.getCards(sets: sets, limit: limit, sortByRandom: shuffle, blacklistIds: blacklistIds);
   Future<List<DominionCard>> getCompositeCards(int cardId) => databaseProvider.getCompositeCards(cardId);
-  Future<List<DominionCard>> getBroughtCards(int cardId) => databaseProvider.getBroughtCards(cardId);
+  Future<List<DominionCard>> getBroughtCards(List<int> cardIds) => databaseProvider.getBroughtCards(cardIds);
+  Future<List<DominionCard>> getEventsLandmarksAndProjects(int limit, bool events, bool landmarks, bool projects) => databaseProvider.getEventsLandmarksAndProjects(limit, events, landmarks, projects);
 
   Future<List<DominionCard>> getBlacklistCards() async {
     var bids = await prefs.getBlacklistIds();
@@ -34,8 +37,8 @@ class Repository {
   Future<List<int>> getBlacklistIds() async => await prefs.getBlacklistIds();
   Future<void> setBlacklistIds(List<int> ids) async => await prefs.setBlacklistIds(ids);
 
-  Future<void> saveMostRecentKingdom(List<DominionCard> cards) async => await prefs.saveMostRecentKingdom(cards);
-  Future<List<DominionCard>> loadMostRecentKingdom() async => await prefs.getMostRecentKingdom();
+  Future<void> saveMostRecentKingdom(KingdomState state) async => await prefs.saveMostRecentKingdom(state);
+  Future<KingdomState> loadMostRecentKingdom() async => await prefs.getMostRecentKingdom();
   
   Future<bool> getUseDarkTheme() async => await prefs.getUseDarkTheme();
   Future<void> setUseDarkTheme(useDark) async => await prefs.setUseDarkTheme(useDark);

@@ -23,7 +23,7 @@ class DBProvider {
   
   initDB() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentsDirectory.path, "dominionizer.db");
+    String path = join(documentsDirectory.path, "dominionizer-NEW.db");
 
     if (FileSystemEntity.typeSync(path) == FileSystemEntityType.notFound) {
       ByteData data = await rootBundle.load(join('assets', 'dominionizer.db'));
@@ -32,6 +32,9 @@ class DBProvider {
       await new File(path).writeAsBytes(bytes);
     }
 
+    // return await openDatabase(path, version: 1, readOnly: false, onUpgrade: (db, oldVersion, newVersion) {
+    //   // TODO: implement updgrade logic
+    // });
     return await openDatabase(path, version: 1, readOnly: false);
   }
 
@@ -71,7 +74,7 @@ class DBProvider {
     final db = await database;
     
     StringBuffer sb = StringBuffer();
-    sb.write(" SELECT c.*, s.name as set_name FROM cards c ");
+    sb.write(" SELECT c.*, s.name as set_name, (select group_concat(name) from types t inner join cardtypes ct on ct.type_id = t.id where ct.card_id = c.id) as type_names FROM cards c ");
     sb.write(" INNER JOIN cardsets cs ON cs.card_id = c.id ");
     sb.write(" INNER JOIN sets s on cs.set_id = s.id ");
 
@@ -113,13 +116,16 @@ class DBProvider {
     }
   }
 
-  Future<List<DominionCard>> getBroughtCards(int cardId) async {
+  Future<List<DominionCard>> getBroughtCards(List<int> cardIds) async {
     final db = await database;
     
     StringBuffer sb = StringBuffer();
-    sb.write(" SELECT c.* FROM broughtcards bc ");
+    sb.write(" SELECT c.*, s.name as set_name, (select group_concat(name) from types t inner join cardtypes ct on ct.type_id = t.id where ct.card_id = c.id) as type_names FROM broughtcards bc ");
     sb.write(" INNER JOIN cards c ON c.id = bc.brought_id ");
-    sb.write(" WHERE bc.bringer_id = $cardId ");
+    sb.write(" INNER JOIN cardsets cs on cs.card_id = c.id ");
+    sb.write(" INNER JOIN sets s on cs.set_id = s.id ");
+    // sb.write(" WHERE bc.bringer_id = $cardId ");
+    sb.write(" WHERE bc.bringer_id IN (${cardIds.join(", ")}) ");
     sb.write(" ORDER BY c.id ");
 
     var res = await db.rawQuery(sb.toString());
@@ -146,6 +152,45 @@ class DBProvider {
     if (res.isNotEmpty) {
       List<DominionCard> cards = res.map((c) => DominionCard.fromMap(c)).toList();
       // deduplicateCardList(cards);
+      return cards;
+    } else {
+      return List<DominionCard>();
+    }
+  }
+
+  Future<List<DominionCard>> getEventsLandmarksAndProjects(int limit, bool events, bool landmarks, bool projects) async {
+    final db = await database;
+
+    List<String> types = [];
+    if (events ?? false) {
+      types.add("'Event'");
+    }
+
+    if (landmarks ?? false) {
+      types.add("'Landmark'");
+    }
+
+    if (projects ?? false) {
+      types.add("'Project'");
+    }
+
+    if (types.length == 0 || limit == 0) {
+      return List<DominionCard>();
+    }
+
+    StringBuffer sb = StringBuffer();
+    sb.write(" SELECT c.*, s.name as set_name, (select group_concat(name) from types t inner join cardtypes ct on ct.type_id = t.id where ct.card_id = c.id) as type_names FROM cards c ");
+    sb.write(" INNER JOIN cardtypes ct ON c.id = ct.card_id ");
+    sb.write(" INNER JOIN types t ON t.id = ct.type_id ");
+    sb.write(" INNER JOIN cardsets cs on cs.card_id = c.id ");
+    sb.write(" INNER JOIN sets s on s.id = cs.set_id ");
+    sb.write(" WHERE t.name IN (${types.join(",")}) ");
+    sb.write(" ORDER BY RANDOM() ");
+    sb.write(" LIMIT $limit ");
+    var res = await db.rawQuery(sb.toString());
+
+    if (res.isNotEmpty) {
+      List<DominionCard> cards = res.map((c) => DominionCard.fromMap(c)).toList();
       return cards;
     } else {
       return List<DominionCard>();

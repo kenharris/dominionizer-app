@@ -48,6 +48,7 @@ class CardPageState extends State<CardPage> {
                     coins: widget._card.coins, 
                     potions: widget._card.potions,
                     debt: widget._card.debt,
+                    compositePile: widget._card.isCompositePile,
                     fontSize: 18,
                     iconSize: 10
                   )
