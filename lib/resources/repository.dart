@@ -12,6 +12,7 @@ class Repository {
   final prefs = SharedPreferencesProvider.spp;
 
   Future<List<DominionSet>> fetchAllSets() => databaseProvider.getSets();
+  Future<List<DominionSet>> fetchIncludedSets() => databaseProvider.getSets(true);
   Future updateSetInclusion(int id, bool included) =>
       databaseProvider.updateSetInclusion(id, included);
   Future updateAllSetsInclusion(bool included) =>
@@ -20,6 +21,8 @@ class Repository {
       databaseProvider.drawKingdomCards(sets, limit);
   Future<DominionCard> swapKingdomCard(List<int> cardIds, List<int> sets) =>
       databaseProvider.getReplacementKingdomCard(cardIds, sets);
+  Future<DominionCard> swapEventLandmarkProjectCard(List<int> cardIds, bool events, bool landmarks, bool projects) =>
+      databaseProvider.getReplacementEventLandmarkProjectCard(cardIds, events, landmarks, projects);
   Future<List<DominionCard>> getCompositeCards(int cardId) =>
       databaseProvider.getCompositeCards(cardId);
   Future<List<DominionCard>> getBroughtCards(List<int> cardIds) =>
@@ -45,15 +48,15 @@ class Repository {
   Future<KingdomState> loadMostRecentKingdom() async =>
       await prefs.getMostRecentKingdom();
 
-  Future<bool> getUseDarkTheme() async => await prefs.getUseDarkTheme();
+  Future<bool> getUseDarkTheme() async => await prefs.getUseDarkTheme() ?? false;
   Future<void> setUseDarkTheme(useDark) async =>
       await prefs.setUseDarkTheme(useDark);
 
-  Future<bool> getAutoBlacklist() async => await prefs.getAutoBlacklist();
+  Future<bool> getAutoBlacklist() async => await prefs.getAutoBlacklist() ?? false;
   Future<void> setAutoBlacklist(autoBlacklist) async =>
       await prefs.setAutoBlacklist(autoBlacklist);
 
-  Future<int> getShuffleSize() async => await prefs.getShuffleSize();
+  Future<int> getShuffleSize() async => await prefs.getShuffleSize() ?? 10;
   Future<void> setShuffleSize(shuffleSize) async =>
       await prefs.setShuffleSize(shuffleSize);
 }

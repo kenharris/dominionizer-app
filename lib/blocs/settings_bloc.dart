@@ -35,9 +35,9 @@ class SettingsBloc {
   void _mapEventToState(SettingsEvent event) async {
     if (event is InitializeAppEvent) {
       if (_state == null) {
-        var useDark = await _repository.getUseDarkTheme() ?? false;
-        var autoBlacklist = await _repository.getAutoBlacklist() ?? false;
-        var shuffleSize = await _repository.getShuffleSize() ?? 10;
+        var useDark = await _repository.getUseDarkTheme();
+        var autoBlacklist = await _repository.getAutoBlacklist();
+        var shuffleSize = await _repository.getShuffleSize();
 
         _state = SettingsState(shuffleSize, autoBlacklist, useDark);
       }

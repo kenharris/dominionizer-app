@@ -39,9 +39,21 @@ class DBProvider {
     return await openDatabase(path, version: 1, readOnly: false);
   }
 
-  Future<List<DominionSet>> getSets() async {
+  Future<List<DominionSet>> getSets([bool onlyIncludedSets = false]) async {
     final db = await database;
-    var res = await db.query('sets');
+    
+    String where = "";
+    List whereArgs = [];
+
+    if (onlyIncludedSets ?? false) {
+      where = "included = ?";
+      whereArgs = [1];
+    } else {
+      where = null;
+      whereArgs = null;
+    }
+    
+    var res = await db.query('sets', where: where, whereArgs: whereArgs);
     if (res.isNotEmpty) {
       List<DominionSet> sets = res.map((s) => DominionSet.fromMap(s)).toList();
       return sets;
@@ -122,8 +134,7 @@ class DBProvider {
     return await _getCards(whereClauses, "RANDOM()", numberOfCards);
   }
 
-  Future<DominionCard> getReplacementKingdomCard(
-      List<int> cardIds, List<int> setsToInclude) async {
+  Future<DominionCard> getReplacementKingdomCard(List<int> cardIds, List<int> setsToInclude) async {
     List<String> whereClauses = [];
 
     whereClauses.add(" c.in_supply = 1 ");
@@ -134,6 +145,38 @@ class DBProvider {
       whereClauses.add(
           " c.id IN (SELECT cards.id FROM sets INNER JOIN cardsets ON sets.id = cardsets.set_id INNER JOIN cards ON cards.id = cardsets.card_id WHERE sets.id IN (${setsToInclude.join(",")})) ");
     }
+
+    var cards = await _getCards(whereClauses, "RANDOM()", 1);
+    return cards.first;
+  }
+
+  Future<DominionCard> getReplacementEventLandmarkProjectCard(List<int> cardIds, bool events, bool landmarks, bool projects) async {
+    List<String> whereClauses = [];
+
+    whereClauses.add(" c.blacklisted = 0 ");
+    whereClauses.add(" c.id NOT IN (${cardIds.join(",")}) ");
+
+    List<String> types = [];
+    if (events ?? false) {
+      types.add("Event");
+    }
+
+    if (landmarks ?? false) {
+      types.add("Landmark");
+    }
+
+    if (projects ?? false) {
+      types.add("Project");
+    }
+
+    whereClauses.add('''
+      c.id IN
+      (SELECT cards.id FROM types
+       INNER JOIN cardtypes ON types.id = cardtypes.type_id
+       INNER JOIN cards ON cards.id = cardtypes.card_id
+       WHERE types.name IN (${types.map((t) => "'$t'").join(",")})
+      )
+    ''');
 
     var cards = await _getCards(whereClauses, "RANDOM()", 1);
     return cards.first;

@@ -39,20 +39,20 @@ class KingdomBloc {
     _sink.add(RestoreMostRecentKingdomEvent());
   }
 
-  void drawNewKingdom(
-      {@required autoBlacklist, @required shuffleSize, setIds}) {
-    _sink.add(DrawKingdomEvent(
-        shuffleSize: shuffleSize,
-        autoBlacklist: autoBlacklist,
-        setIds: setIds));
+  void drawNewKingdom() {
+    _sink.add(DrawKingdomEvent());
   }
 
   void sortKingdom(KingdomSortType kst) {
     _sink.add(SortKingdomEvent(kst));
   }
 
-  void exchangeCard(DominionCard card, List<int> setIds) {
-    _sink.add(SwapCardEvent(card, setIds));
+  void exchangeCard(DominionCard card) {
+    _sink.add(SwapCardEvent(card));
+  }
+
+  void exchangeEventLandmarkProject(DominionCard card) {
+    _sink.add(SwapEventLandmarkProjectEvent(card));
   }
 
   void undoExchange() {
@@ -63,21 +63,33 @@ class KingdomBloc {
     switch (_sortType) {
       case KingdomSortType.CardNameDescending:
         _cards.sort((a, b) => b.name.compareTo(a.name));
+        _broughtCards.sort((a, b) => b.name.compareTo(a.name));
+        _eventsLandmarksProjects.sort((a, b) => b.name.compareTo(a.name));
         break;
       case KingdomSortType.CostAscending:
         _cards.sort((a, b) => a.totalCost.compareTo(b.totalCost));
+        _broughtCards.sort((a, b) => a.totalCost.compareTo(b.totalCost));
+        _eventsLandmarksProjects.sort((a, b) => a.totalCost.compareTo(b.totalCost));
         break;
       case KingdomSortType.CostDescending:
         _cards.sort((a, b) => b.totalCost.compareTo(a.totalCost));
+        _broughtCards.sort((a, b) => b.totalCost.compareTo(a.totalCost));
+        _eventsLandmarksProjects.sort((a, b) => b.totalCost.compareTo(a.totalCost));
         break;
       case KingdomSortType.SetNameAscending:
         _cards.sort((a, b) => a.setName.compareTo(b.setName));
+        _broughtCards.sort((a, b) => a.setName.compareTo(b.setName));
+        _eventsLandmarksProjects.sort((a, b) => a.setName.compareTo(b.setName));
         break;
       case KingdomSortType.SetNameDescending:
         _cards.sort((a, b) => b.setName.compareTo(a.setName));
+        _broughtCards.sort((a, b) => b.setName.compareTo(a.setName));
+        _eventsLandmarksProjects.sort((a, b) => b.setName.compareTo(a.setName));
         break;
       default:
         _cards.sort((a, b) => a.name.compareTo(b.name));
+        _broughtCards.sort((a, b) => a.name.compareTo(b.name));
+        _eventsLandmarksProjects.sort((a, b) => a.name.compareTo(b.name));
     }
   }
 
@@ -108,12 +120,15 @@ class KingdomBloc {
 
       // newState = KingdomState(_cards, false, KingdomSortType.CardNameAscending, _broughtCards, _eventsLandmarksProjects);
     } else if (event is DrawKingdomEvent) {
-      if (event.autoBlacklist && _cards != null && _cards.length > 0) {
+      bool autoBlacklist = await _repository.getAutoBlacklist();
+
+      if (autoBlacklist && _cards != null && _cards.length > 0) {
         await _repository.blacklistCards(_cards.map((c) => c.id).toList());
       }
 
-      _cards =
-          await _repository.drawKingdomCards(event.setIds, event.shuffleSize);
+      List<int> setIds = (await _repository.fetchIncludedSets()).map((si) => si.id).toList();
+      int shuffleSize = await _repository.getShuffleSize();
+      _cards = await _repository.drawKingdomCards(setIds, shuffleSize);
       _broughtCards = await _getBroughtCards(_cards
           .map((dc) => dc.bringsCards ? dc.id : null)
           .where((id) => id != null)
@@ -133,8 +148,9 @@ class KingdomBloc {
           _cards, false, _sortType, _broughtCards, _eventsLandmarksProjects);
     } else if (event is SwapCardEvent) {
       List<int> currentCardIds = _cards.map((c) => c.id).toList();
+      List<int> setIds = (await _repository.fetchIncludedSets()).map((si) => si.id).toList();
       DominionCard swappedCard =
-          await _repository.swapKingdomCard(currentCardIds, event.setIds);
+          await _repository.swapKingdomCard(currentCardIds, setIds);
       SwapState newSwapState = SwapState(event.card, swappedCard, false);
       _swapStateController.sink.add(newSwapState);
 
@@ -151,14 +167,35 @@ class KingdomBloc {
       _sortCards();
       newState = KingdomState(
           _cards, false, _sortType, _broughtCards, _eventsLandmarksProjects);
+    } else if (event is SwapEventLandmarkProjectEvent) {
+      List<int> currentCardIds = _eventsLandmarksProjects.map((c) => c.id).toList();
+      DominionCard swappedCard =
+          await _repository.swapEventLandmarkProjectCard(currentCardIds, true, true, true);
+      SwapState newSwapState = SwapState(event.card, swappedCard, false);
+      _swapStateController.sink.add(newSwapState);
+
+      _replacedCard = event.card;
+      _replacementCard = swappedCard;
+
+      _eventsLandmarksProjects.removeWhere((c) => c.id == event.card.id);
+      _eventsLandmarksProjects.add(swappedCard);
+
+      _sortCards();
+      newState = KingdomState(_cards, false, _sortType, _broughtCards, _eventsLandmarksProjects);
     } else if (event is UndoSwapEvent) {
-      _cards.removeWhere((c) => c.id == _replacementCard.id);
-      _cards.add(_replacedCard);
-      _broughtCards = await _getBroughtCards(_cards
+      if (_eventsLandmarksProjects.any((dc) => dc.id == _replacementCard.id)) {
+        _eventsLandmarksProjects.removeWhere((c) => c.id == _replacementCard.id);
+        _eventsLandmarksProjects.add(_replacedCard);
+      } else {
+        _cards.removeWhere((c) => c.id == _replacementCard.id);
+        _cards.add(_replacedCard);
+        _broughtCards = await _getBroughtCards(_cards
           .map((dc) => dc.bringsCards ? dc.id : null)
           .where((id) => id != null)
           .toSet()
           .toList());
+      }
+      
       _sortCards();
 
       SwapState newSwapState = SwapState(_replacementCard, _replacedCard, true);
@@ -178,5 +215,5 @@ class KingdomBloc {
     _kingdomStateController.close();
     _kingdomEventController.close();
     _swapStateController.close();
-  }
+  }  
 }

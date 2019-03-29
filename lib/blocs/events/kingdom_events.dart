@@ -5,14 +5,7 @@ abstract class KingdomBlocEvent {}
 
 class RestoreMostRecentKingdomEvent extends KingdomBlocEvent {}
 
-class DrawKingdomEvent extends KingdomBlocEvent {
-  final bool autoBlacklist;
-  final int shuffleSize;
-  final List<int> setIds;
-
-  DrawKingdomEvent(
-      {@required this.autoBlacklist, @required this.shuffleSize, this.setIds});
-}
+class DrawKingdomEvent extends KingdomBlocEvent {}
 
 class SortKingdomEvent extends KingdomBlocEvent {
   final KingdomSortType sortType;

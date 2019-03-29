@@ -1,10 +1,10 @@
-import 'package:dominionizer_app/blocs/sets_bloc.dart';
 import 'package:dominionizer_app/blocs/settings_bloc.dart';
 import 'package:dominionizer_app/dialogs/sortDialog.dart';
 import 'package:dominionizer_app/model/dominion_card.dart';
-import 'package:dominionizer_app/model/dominion_set.dart';
 import 'package:dominionizer_app/widgets/app_settings.dart';
 import 'package:dominionizer_app/widgets/kingom_card_item.dart';
+import 'package:dominionizer_app/widgets/swap_card_snackbar.dart';
+import 'package:dominionizer_app/widgets/undo_swap_card_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:dominionizer_app/widgets/drawer.dart';
 import 'package:dominionizer_app/blocs/kingdom_bloc.dart';
@@ -12,14 +12,12 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class KingdomPageState extends State<KingdomPage> {
   final KingdomBloc kingdomBloc = KingdomBloc();
-  final SetsBloc setsBloc = SetsBloc();
 
   KingdomSortType _sortType = KingdomSortType.CardNameAscending;
 
   int _cardsToShuffle;
   bool _autoBlacklist;
 
-  List<DominionSet> _sets;
   ScaffoldState _scaffold;
 
   void _respondToState(KingdomState state) {
@@ -29,11 +27,11 @@ class KingdomPageState extends State<KingdomPage> {
   }
 
   void _swapCard(DominionCard card) {
-    kingdomBloc.exchangeCard(card, _sets.map((ds) => ds.id).toList());
+    kingdomBloc.exchangeCard(card);
   }
 
-  void _undoSwap() {
-    kingdomBloc.undoExchange();
+  void _swapEventLandmarkProject(DominionCard card) {
+    kingdomBloc.exchangeEventLandmarkProject(card);
   }
 
   void _respondToSwap(SwapState state) {
@@ -44,61 +42,18 @@ class KingdomPageState extends State<KingdomPage> {
         _scaffold.hideCurrentSnackBar();
         _scaffold.showSnackBar(SnackBar(
           backgroundColor: Theme.of(context).buttonColor,
-          content: Row(children: [
-            Text("Card exchange undone.",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).accentColor)),
-          ]),
+          content: UndoSwapCardSnackbar(),
           duration: const Duration(seconds: 2),
         ));
       } else {
         _scaffold.hideCurrentSnackBar();
         _scaffold.showSnackBar(SnackBar(
           backgroundColor: Theme.of(context).buttonColor,
-          content: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Flexible(
-                    flex: 0,
-                    child: Text("${state.initialCard.name}",
-                        softWrap: true,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).accentColor,
-                            decoration: TextDecoration.underline))),
-                Expanded(
-                  child: Icon(
-                    FontAwesomeIcons.longArrowAltRight,
-                    size: 18,
-                    color: Theme.of(context).accentColor,
-                  ),
-                ),
-                Flexible(
-                  flex: 1,
-                  child: Text("${state.swappedCard.name}",
-                      softWrap: true,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).accentColor,
-                          decoration: TextDecoration.underline)),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: GestureDetector(
-                    child: Icon(FontAwesomeIcons.undo,
-                        size: 12, color: Theme.of(context).accentColor),
-                    onTap: () {
-                      _undoSwap();
-                    },
-                  ),
-                )
-              ]),
+          content: SwapCardSnackbar(
+            initialCardName: state.initialCard.name,
+            swappedCardName: state.swappedCard.name,
+            undoFunc: () => kingdomBloc.undoExchange()
+          ),
           duration: const Duration(seconds: 2),
         ));
       }
@@ -106,15 +61,7 @@ class KingdomPageState extends State<KingdomPage> {
   }
 
   void _newShuffle() {
-    List<int> setIds = _sets.map((si) => si.id).toList();
-    kingdomBloc.drawNewKingdom(
-        shuffleSize: _cardsToShuffle,
-        autoBlacklist: _autoBlacklist,
-        setIds: setIds);
-  }
-
-  void _onSetInitialize(SetsBlocState setsState) {
-    _sets = setsState.sets.where((s) => s.included).toList();
+    kingdomBloc.drawNewKingdom();
   }
 
   void _onAppStateChange(SettingsState appState) {
@@ -141,8 +88,6 @@ class KingdomPageState extends State<KingdomPage> {
   @override
   void initState() {
     kingdomBloc.kingdomStream.listen(_respondToState);
-    setsBloc.sets.listen(_onSetInitialize);
-    setsBloc.initialize();
     kingdomBloc.swapStream.listen(_respondToSwap);
 
     super.initState();
@@ -268,15 +213,36 @@ class KingdomPageState extends State<KingdomPage> {
                                   );
                                 } else {
                                   // Events, Landmarks, and Projects
-                                  return KingdomCardItem(
-                                    card: snapshot.data.eventsLandmarksProjects[
-                                        index -
-                                            snapshot.data.numberOfKingdomCards -
-                                            snapshot.data.numberOfBroughtCards],
-                                    isEventProjectOrLandmark: true,
-                                    topBorder: index ==
-                                        (snapshot.data.numberOfKingdomCards +
-                                            snapshot.data.numberOfBroughtCards),
+                                  return Dismissible(
+                                    background: Container(
+                                        color: Theme.of(context).accentColor,
+                                        padding: const EdgeInsets.fromLTRB(
+                                            16.0, 0, 16.0, 0),
+                                        child: Align(
+                                          alignment: Alignment.centerRight,
+                                          child: new Icon(
+                                              FontAwesomeIcons.random,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSecondary),
+                                        )),
+                                    key: Key(snapshot.data.eventsLandmarksProjects[index - snapshot.data.numberOfKingdomCards - snapshot.data.numberOfBroughtCards].id
+                                        .toString()),
+                                    onDismissed: (d) {
+                                      _scaffold = Scaffold.of(context);
+                                      _swapEventLandmarkProject(snapshot.data.eventsLandmarksProjects[index - snapshot.data.numberOfKingdomCards - snapshot.data.numberOfBroughtCards]);
+                                    },
+                                    direction: DismissDirection.endToStart,
+                                    child: KingdomCardItem(
+                                        card:
+                                            snapshot.data
+                                                    .eventsLandmarksProjects[index - snapshot.data.numberOfKingdomCards - snapshot.data.numberOfBroughtCards],
+                                        isEventProjectOrLandmark: true,
+                                        topBorder: index ==
+                                            (snapshot
+                                                    .data.numberOfKingdomCards +
+                                                snapshot.data
+                                                    .numberOfBroughtCards)),
                                   );
                                 }
                               });

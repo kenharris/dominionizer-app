@@ -63,9 +63,14 @@ class SwapState {
 
 class SwapCardEvent extends KingdomBlocEvent {
   final DominionCard card;
-  final List<int> setIds;
 
-  SwapCardEvent(this.card, this.setIds);
+  SwapCardEvent(this.card);
+}
+
+class SwapEventLandmarkProjectEvent extends KingdomBlocEvent {
+  final DominionCard card;
+
+  SwapEventLandmarkProjectEvent(this.card);
 }
 
 class UndoSwapEvent extends KingdomBlocEvent {}
