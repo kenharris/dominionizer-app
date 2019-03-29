@@ -19,7 +19,7 @@ class SettingsBloc {
 
   SettingsState _state;
 
-  SettingsState get state => _state ?? SettingsState(10, false, false);
+  SettingsState get state => _state ?? SettingsState(10, false, false, 2);
   Stream<SettingsState> get appStateStream => _appStateController.stream;
 
   Sink<SettingsEvent> get _sink => _appEventController.sink;
@@ -28,8 +28,8 @@ class SettingsBloc {
     _sink.add(InitializeAppEvent());
   }
 
-  void updateAllSettings(int shuffleSize, bool isAutoBlacklist, bool isDarkTheme) {
-    _sink.add(new ChangeAllSettingsEvent(shuffleSize, isAutoBlacklist, isDarkTheme));
+  void updateAllSettings(int shuffleSize, bool isAutoBlacklist, bool isDarkTheme, int eventsLandmarksProjectsIncluded) {
+    _sink.add(new ChangeAllSettingsEvent(shuffleSize, isAutoBlacklist, isDarkTheme, eventsLandmarksProjectsIncluded));
   }
 
   void _mapEventToState(SettingsEvent event) async {
@@ -38,19 +38,22 @@ class SettingsBloc {
         var useDark = await _repository.getUseDarkTheme();
         var autoBlacklist = await _repository.getAutoBlacklist();
         var shuffleSize = await _repository.getShuffleSize();
+        var eventsLandmarksProjectsIncluded = await _repository.getEventsLandmarksProjectsIncluded();
 
-        _state = SettingsState(shuffleSize, autoBlacklist, useDark);
+        _state = SettingsState(shuffleSize, autoBlacklist, useDark, eventsLandmarksProjectsIncluded);
       }
     } else if (event is ChangeAllSettingsEvent) {
       bool isDarkTheme = event.darkTheme;
       bool isAutoBlacklist = event.autoBlacklist;
       int shuffleSize = event.shuffleSize;
+      int eventsLandmarksProjectsIncluded = event.eventsLandmarksProjectsIncluded;
 
       _repository.setUseDarkTheme(isDarkTheme);
       _repository.setAutoBlacklist(isAutoBlacklist);
       _repository.setShuffleSize(shuffleSize);
+      _repository.setEventsLandmarksProjectsIncluded(eventsLandmarksProjectsIncluded);
 
-      _state = SettingsState(shuffleSize, isAutoBlacklist, isDarkTheme);
+      _state = SettingsState(shuffleSize, isAutoBlacklist, isDarkTheme, eventsLandmarksProjectsIncluded);
     }
 
     _appStateController.sink.add(_state);

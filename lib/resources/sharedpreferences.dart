@@ -9,6 +9,8 @@ class SharedPreferencesProvider {
   static const String AUTO_BLACKLIST = 'AutoBlacklist';
   static const String SHUFFLE_SIZE = 'ShuffleSize';
   static const String LATEST_KINGDOM = 'LatestKingdom';
+  static const String EVENTS_LANDMARKS_PROJECTS_INCLUDED =
+      'EventsLandmarksProjectsIncluded';
 
   SharedPreferencesProvider._();
   static final SharedPreferencesProvider spp = SharedPreferencesProvider._();
@@ -91,4 +93,10 @@ class SharedPreferencesProvider {
       await _setBool(AUTO_BLACKLIST, autoBlacklist);
   Future<void> setShuffleSize(int shuffleSize) async =>
       await _setInt(SHUFFLE_SIZE, shuffleSize);
+
+  Future<int> getEventsLandmarksProjectsIncluded() async =>
+      await _getInt(EVENTS_LANDMARKS_PROJECTS_INCLUDED);
+  Future setEventsLandmarksProjectsIncluded(
+          int eventsProjectsLandmarksIncluded) async =>
+      await _setInt(EVENTS_LANDMARKS_PROJECTS_INCLUDED, eventsProjectsLandmarksIncluded);
 }

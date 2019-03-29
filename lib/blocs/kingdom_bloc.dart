@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:dominionizer_app/blocs/enums/kingdom_enums.dart';
 import 'package:dominionizer_app/blocs/events/kingdom_events.dart';
@@ -69,12 +70,14 @@ class KingdomBloc {
       case KingdomSortType.CostAscending:
         _cards.sort((a, b) => a.totalCost.compareTo(b.totalCost));
         _broughtCards.sort((a, b) => a.totalCost.compareTo(b.totalCost));
-        _eventsLandmarksProjects.sort((a, b) => a.totalCost.compareTo(b.totalCost));
+        _eventsLandmarksProjects
+            .sort((a, b) => a.totalCost.compareTo(b.totalCost));
         break;
       case KingdomSortType.CostDescending:
         _cards.sort((a, b) => b.totalCost.compareTo(a.totalCost));
         _broughtCards.sort((a, b) => b.totalCost.compareTo(a.totalCost));
-        _eventsLandmarksProjects.sort((a, b) => b.totalCost.compareTo(a.totalCost));
+        _eventsLandmarksProjects
+            .sort((a, b) => b.totalCost.compareTo(a.totalCost));
         break;
       case KingdomSortType.SetNameAscending:
         _cards.sort((a, b) => a.setName.compareTo(b.setName));
@@ -103,8 +106,10 @@ class KingdomBloc {
 
   Future<List<DominionCard>> _getEventsLandmarksAndProjects(
       int limit, bool events, bool landmarks, bool projects) async {
+    var setIds =
+        (await _repository.fetchIncludedSets()).map((si) => si.id).toList();
     return await _repository.getEventsLandmarksAndProjects(
-        limit, events, landmarks, projects);
+        setIds, limit, events, landmarks, projects);
   }
 
   void _mapEventToState(KingdomBlocEvent event) async {
@@ -126,7 +131,8 @@ class KingdomBloc {
         await _repository.blacklistCards(_cards.map((c) => c.id).toList());
       }
 
-      List<int> setIds = (await _repository.fetchIncludedSets()).map((si) => si.id).toList();
+      List<int> setIds =
+          (await _repository.fetchIncludedSets()).map((si) => si.id).toList();
       int shuffleSize = await _repository.getShuffleSize();
       _cards = await _repository.drawKingdomCards(setIds, shuffleSize);
       _broughtCards = await _getBroughtCards(_cards
@@ -134,8 +140,11 @@ class KingdomBloc {
           .where((id) => id != null)
           .toSet()
           .toList());
+
+      Random r = Random();
+      int eventsLandmarksProjectsToInclude = r.nextInt((await _repository.getEventsLandmarksProjectsIncluded()) + 1);
       _eventsLandmarksProjects =
-          await _getEventsLandmarksAndProjects(2, true, true, true);
+          await _getEventsLandmarksAndProjects(eventsLandmarksProjectsToInclude, true, true, true);
 
       _cards.sort((a, b) => a.name.compareTo(b.name));
       newState = KingdomState(
@@ -148,7 +157,8 @@ class KingdomBloc {
           _cards, false, _sortType, _broughtCards, _eventsLandmarksProjects);
     } else if (event is SwapCardEvent) {
       List<int> currentCardIds = _cards.map((c) => c.id).toList();
-      List<int> setIds = (await _repository.fetchIncludedSets()).map((si) => si.id).toList();
+      List<int> setIds =
+          (await _repository.fetchIncludedSets()).map((si) => si.id).toList();
       DominionCard swappedCard =
           await _repository.swapKingdomCard(currentCardIds, setIds);
       SwapState newSwapState = SwapState(event.card, swappedCard, false);
@@ -168,9 +178,10 @@ class KingdomBloc {
       newState = KingdomState(
           _cards, false, _sortType, _broughtCards, _eventsLandmarksProjects);
     } else if (event is SwapEventLandmarkProjectEvent) {
-      List<int> currentCardIds = _eventsLandmarksProjects.map((c) => c.id).toList();
-      DominionCard swappedCard =
-          await _repository.swapEventLandmarkProjectCard(currentCardIds, true, true, true);
+      List<int> currentCardIds =
+          _eventsLandmarksProjects.map((c) => c.id).toList();
+      DominionCard swappedCard = await _repository.swapEventLandmarkProjectCard(
+          currentCardIds, true, true, true);
       SwapState newSwapState = SwapState(event.card, swappedCard, false);
       _swapStateController.sink.add(newSwapState);
 
@@ -181,21 +192,23 @@ class KingdomBloc {
       _eventsLandmarksProjects.add(swappedCard);
 
       _sortCards();
-      newState = KingdomState(_cards, false, _sortType, _broughtCards, _eventsLandmarksProjects);
+      newState = KingdomState(
+          _cards, false, _sortType, _broughtCards, _eventsLandmarksProjects);
     } else if (event is UndoSwapEvent) {
       if (_eventsLandmarksProjects.any((dc) => dc.id == _replacementCard.id)) {
-        _eventsLandmarksProjects.removeWhere((c) => c.id == _replacementCard.id);
+        _eventsLandmarksProjects
+            .removeWhere((c) => c.id == _replacementCard.id);
         _eventsLandmarksProjects.add(_replacedCard);
       } else {
         _cards.removeWhere((c) => c.id == _replacementCard.id);
         _cards.add(_replacedCard);
         _broughtCards = await _getBroughtCards(_cards
-          .map((dc) => dc.bringsCards ? dc.id : null)
-          .where((id) => id != null)
-          .toSet()
-          .toList());
+            .map((dc) => dc.bringsCards ? dc.id : null)
+            .where((id) => id != null)
+            .toSet()
+            .toList());
       }
-      
+
       _sortCards();
 
       SwapState newSwapState = SwapState(_replacementCard, _replacedCard, true);
@@ -215,5 +228,5 @@ class KingdomBloc {
     _kingdomStateController.close();
     _kingdomEventController.close();
     _swapStateController.close();
-  }  
+  }
 }

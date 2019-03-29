@@ -8,6 +8,7 @@ class SettingsPageState extends State<SettingsPage> {
   bool _isAutoBlacklist = false;
   bool _isDarkTheme = false;
   int _shuffleSize = 10;
+  int _eventsProjectsLandmarksIncluded = 2;
 
   bool _isDirty;
 
@@ -16,7 +17,7 @@ class SettingsPageState extends State<SettingsPage> {
   void _updateAllSettings() {
     if (_isDirty) {
       AppSettingsProvider.of(context)
-          .updateAllSettings(_shuffleSize, _isAutoBlacklist, _isDarkTheme);
+          .updateAllSettings(_shuffleSize, _isAutoBlacklist, _isDarkTheme, _eventsProjectsLandmarksIncluded);
     }
     Navigator.of(context).pop();
   }
@@ -42,6 +43,13 @@ class SettingsPageState extends State<SettingsPage> {
     });
   }
 
+  void _setEventsProjectsLandmarksIncluded(int val) {
+    setState(() {
+      _isDirty = true;
+      _eventsProjectsLandmarksIncluded = val;
+    });
+  }
+
   void _showDialog() {
     showDialog<int>(
         context: context,
@@ -49,6 +57,15 @@ class SettingsPageState extends State<SettingsPage> {
           return IntListDialog(
               [6, 7, 8, 9, 10, 11, 12, 13, 14, 15], _shuffleSize, 10);
         }).then((i) => _updateSuffleSize(i));
+  }
+
+  void _showEventsLandmarksProjectsDialog() {
+    showDialog<int>(
+        context: context,
+        builder: (BuildContext context) {
+          return IntListDialog(
+              [0, 1, 2, 3], _eventsProjectsLandmarksIncluded, 2);
+        }).then((i) => _setEventsProjectsLandmarksIncluded(i));
   }
 
   @override
@@ -63,6 +80,7 @@ class SettingsPageState extends State<SettingsPage> {
     _isAutoBlacklist = settingsState.autoBlacklist;
     _isDarkTheme = settingsState.isDarkTheme;
     _shuffleSize = settingsState.cardsToShuffle;
+    _eventsProjectsLandmarksIncluded =settingsState.eventsLandmarksProjectsIncluded;
 
     super.didChangeDependencies();
   }
@@ -84,6 +102,12 @@ class SettingsPageState extends State<SettingsPage> {
                   subtitle: const Text("Choose large or small shuffles."),
                   trailing: Text("$_shuffleSize"),
                   onTap: () => _showDialog(),
+                ),
+                ListTile(
+                  title: const Text("How many events/landmarks/projects?"),
+                  subtitle: const Text("Randomly include up to this number."),
+                  trailing: Text("$_eventsProjectsLandmarksIncluded"),
+                  onTap: () => _showEventsLandmarksProjectsDialog(),
                 ),
                 ListTile(
                     title: const Text("Auto-blacklist kingdom on new shuffle"),

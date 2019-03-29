@@ -28,9 +28,9 @@ class Repository {
   Future<List<DominionCard>> getBroughtCards(List<int> cardIds) =>
       databaseProvider.getBroughtCards(cardIds);
   Future<List<DominionCard>> getEventsLandmarksAndProjects(
-          int limit, bool events, bool landmarks, bool projects) =>
+          List<int> setIds, int limit, bool events, bool landmarks, bool projects) =>
       databaseProvider.getEventsLandmarksAndProjects(
-          limit, events, landmarks, projects);
+          setIds, limit, events, landmarks, projects);
 
   Future resetBlacklist() async => await databaseProvider.clearBlacklist();
   Future blacklistCards(List<int> cardIds) async =>
@@ -59,4 +59,8 @@ class Repository {
   Future<int> getShuffleSize() async => await prefs.getShuffleSize() ?? 10;
   Future<void> setShuffleSize(shuffleSize) async =>
       await prefs.setShuffleSize(shuffleSize);
+
+  Future<int> getEventsLandmarksProjectsIncluded() async => await prefs.getEventsLandmarksProjectsIncluded() ?? 2;
+  Future<void> setEventsLandmarksProjectsIncluded(int eventsProjectsLandmarksIncluded) async =>
+      await prefs.setEventsLandmarksProjectsIncluded(eventsProjectsLandmarksIncluded);
 }

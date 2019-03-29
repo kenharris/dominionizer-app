@@ -235,7 +235,7 @@ class DBProvider {
   }
 
   Future<List<DominionCard>> getEventsLandmarksAndProjects(
-      int limit, bool events, bool landmarks, bool projects) async {
+      List<int> setIds, int limit, bool events, bool landmarks, bool projects) async {
     final db = await database;
 
     List<String> types = [];
@@ -255,26 +255,31 @@ class DBProvider {
       return List<DominionCard>();
     }
 
-    StringBuffer sb = StringBuffer();
-    sb.write(" SELECT c.*, ");
-    sb.write(
-        " (select group_concat(name) from sets s inner join cardsets cs on cs.set_id = s.id where cs.card_id = c.id) as set_names, ");
-    sb.write(
-        " (select group_concat(name) from types t inner join cardtypes ct on ct.type_id = t.id where ct.card_id = c.id) as type_names ");
-    sb.write(" FROM cards c ");
-    sb.write(" WHERE c.id IN ");
-    sb.write("  (SELECT cards.id FROM types ");
-    sb.write("    INNER JOIN cardtypes ON types.id = cardtypes.type_id ");
-    sb.write("    INNER JOIN cards ON cards.id = cardtypes.card_id ");
-    sb.write("    WHERE types.name IN (${types.map((t) => "?").join(",")})");
-    sb.write("  )");
-    sb.write(" ORDER BY RANDOM() ");
-    sb.write(" LIMIT ? ");
+    String query = '''
+    SELECT c.*,
+    (select group_concat(name) from sets s inner join cardsets cs on cs.set_id = s.id where cs.card_id = c.id) as set_names,
+    (select group_concat(name) from types t inner join cardtypes ct on ct.type_id = t.id where ct.card_id = c.id) as type_names
+    FROM cards c
+    WHERE c.id IN
+     (SELECT cards.id FROM types
+       INNER JOIN cardtypes ON types.id = cardtypes.type_id
+       INNER JOIN cards ON cards.id = cardtypes.card_id
+       WHERE types.name IN (${types.map((t) => "?").join(",")})
+     )
+    AND c.id IN 
+      (SELECT cards.id FROM sets
+        INNER JOIN cardsets ON sets.id = cardsets.set_id
+        INNER JOIN cards ON cards.id = cardsets.card_id
+        WHERE sets.id IN (${setIds.map((s) => "?").join(",")}))
+    ORDER BY RANDOM()
+    LIMIT ?
+    ''';
 
     List<dynamic> params = List<dynamic>();
     params.addAll(types);
+    params.addAll(setIds);
     params.add(limit);
-    var res = await db.rawQuery(sb.toString(), params);
+    var res = await db.rawQuery(query, params);
 
     if (res.isNotEmpty) {
       List<DominionCard> cards =
