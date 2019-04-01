@@ -15,10 +15,13 @@ class CardText extends StatelessWidget {
     TextStyle style = TextStyle(fontSize: fontSize);
 
     builder.add(
-      Text("${top.replaceAll("\\n", "\n\n")}", style: style)
+      Text("${top.replaceAll("\\n", "\n\n")}", 
+        style: style,
+        textAlign: TextAlign.center
+      ),
     );
 
-    if (bottom != "") {
+    if (bottom.trim().isNotEmpty) {
       builder.add(
         Padding(
           padding: EdgeInsets.only(top: 10),

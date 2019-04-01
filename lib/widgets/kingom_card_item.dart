@@ -6,14 +6,45 @@ import 'package:flutter/material.dart';
 
 class KingdomCardItem extends StatelessWidget {
   final DominionCard card;
-  final bool isBroughtCard, isEventProjectOrLandmark, topBorder;
+  final bool isBroughtCard, isEventProjectOrLandmark, topBorder, borders;
   final double fontSize;
 
-  KingdomCardItem({@required this.card, this.isBroughtCard = false, this.isEventProjectOrLandmark = false, this.topBorder = false, this.fontSize = 14});
+  KingdomCardItem({@required this.card, this.isBroughtCard = false, this.isEventProjectOrLandmark = false, 
+                    this.topBorder = false, this.fontSize = 14, this.borders = true});
   
+  BoxBorder _createBorder(BuildContext context) {
+    if (borders) {
+      if (topBorder) {
+        return BorderDirectional(
+          top: BorderSide(
+            color: Theme.of(context).accentColor,
+            width: 2
+          )
+        );
+      }
+
+      return BorderDirectional(
+        top:BorderSide(
+          color: Theme.of(context).dividerColor
+        )
+      );
+    }
+  }
+
+  Color _getBackgroundColor(BuildContext context) {
+    if (isBroughtCard) {
+      return Theme.of(context).highlightColor;
+    } else if (isEventProjectOrLandmark) {
+      return Theme.of(context).backgroundColor;
+    }
+    
+    return Theme.of(context).canvasColor;
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () {
         Navigator.push(
           context,
@@ -22,15 +53,9 @@ class KingdomCardItem extends StatelessWidget {
       },
       child: Container(
         decoration: BoxDecoration(
-            color: isBroughtCard ? Theme.of(context).highlightColor : isEventProjectOrLandmark ? Theme.of(context).backgroundColor : Theme.of(context).canvasColor,
-            border: topBorder 
-              ? BorderDirectional(
-                top: BorderSide(
-                  color: Theme.of(context).dividerColor
-                )
-            )
-            : null
-          ),
+          color: _getBackgroundColor(context),
+          border: _createBorder(context)
+        ),
         child: Padding(
           padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
           child: Table(

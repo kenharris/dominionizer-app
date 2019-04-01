@@ -58,7 +58,7 @@ class DBProvider {
       List<DominionSet> sets = res.map((s) => DominionSet.fromMap(s)).toList();
       return sets;
     } else {
-      return new List<DominionSet>();
+      return await getSets();
     }
   }
 
@@ -125,11 +125,12 @@ class DBProvider {
 
     whereClauses.add(" c.in_supply = 1 ");
     whereClauses.add(" c.blacklisted = 0 ");
-
-    if (setsToInclude != null && setsToInclude.length > 0) {
-      whereClauses.add(
-          " c.id IN (SELECT cards.id FROM sets INNER JOIN cardsets ON sets.id = cardsets.set_id INNER JOIN cards ON cards.id = cardsets.card_id WHERE sets.id IN (${setsToInclude.join(",")})) ");
-    }
+    whereClauses.add(''' c.id IN (
+      SELECT cards.id FROM sets 
+      INNER JOIN cardsets ON sets.id = cardsets.set_id 
+      INNER JOIN cards ON cards.id = cardsets.card_id 
+      WHERE sets.id IN (${setsToInclude.join(",")})
+    ) ''');
 
     return await _getCards(whereClauses, "RANDOM()", numberOfCards);
   }

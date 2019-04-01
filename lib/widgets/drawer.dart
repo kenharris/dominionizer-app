@@ -19,10 +19,13 @@ class _MyDrawerState extends State<MyDrawer> {
         // Important: Remove any padding from the ListView.
         padding: EdgeInsets.zero,
         children: <Widget>[
-          DrawerHeader(
-            child: Text('Drawer Header'),
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
+          SizedBox(
+            height: 125,
+            child: DrawerHeader(
+              child: Text('Dominionizer'),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+              ),
             ),
           ),
           ListTile(

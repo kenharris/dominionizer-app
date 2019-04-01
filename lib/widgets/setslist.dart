@@ -1,3 +1,4 @@
+import 'package:dominionizer_app/model/dominion_set.dart';
 import 'package:flutter/material.dart';
 import 'package:dominionizer_app/widgets.dart';
 import 'package:dominionizer_app/blocs/sets_bloc.dart';
@@ -11,18 +12,39 @@ class SetsListState extends State<SetsList> {
     bloc.toggleIncludedState(id, included);
   }
 
+  List<Widget> _getSetRowChildren(DominionSet setInfo) {
+    List<Widget> builder = List<Widget>();
+
+    builder.add(
+      Text(
+        setInfo.name, 
+        style: TextStyle(
+          color: setInfo.included ? Theme.of(context).accentColor : Theme.of(context).disabledColor,
+          fontWeight: setInfo.included ? FontWeight.bold :FontWeight.normal
+        )
+      )
+    );
+
+    if (setInfo.included) {
+      builder.add(
+        Icon(FontAwesomeIcons.checkCircle, color: Theme.of(context).accentColor)
+      );
+    }
+
+    return builder.toList();
+  }
   @override
   Widget build (BuildContext ctxt) {
     bloc = ServiceProviderWidget.of(context);
     bloc.initialize();
 
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Flexible(
           child: StreamBuilder<SetsBlocState>(
-          stream: ServiceProviderWidget.of(context).sets,
+            stream: ServiceProviderWidget.of(context).sets,
             builder: (BuildContext context, AsyncSnapshot<SetsBlocState> snapshot) {
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
@@ -33,22 +55,31 @@ class SetsListState extends State<SetsList> {
                   else
                     return ListView.builder
                     (
+                      shrinkWrap: true,
                       itemCount: snapshot.data.sets.length,
                       itemBuilder: (BuildContext ctxt, int index) {
-                        return Container(
-                          child: ListTile(
-                            title: Text(
-                              snapshot.data.sets[index].name, 
-                              style: TextStyle(
-                                color: snapshot.data.sets[index].included ? Theme.of(context).accentColor : Theme.of(context).disabledColor,
-                                fontWeight: snapshot.data.sets[index].included ? FontWeight.bold :FontWeight.normal,
-                              ),
-                              textAlign: TextAlign.start
+                        return GestureDetector(
+                          onTap: () => _toggleSelectedState(snapshot.data.sets[index].id, !snapshot.data.sets[index].included),
+                          behavior: HitTestBehavior.opaque,
+                          child: Container(
+                            height: 45,
+                            decoration: BoxDecoration(
+                              border: BorderDirectional(
+                                bottom: BorderSide(
+                                  color: Theme.of(context).primaryColorDark
+                                )
+                              )
                             ),
-                            trailing: snapshot.data.sets[index].included
-                              ? Icon(FontAwesomeIcons.checkCircle, color: Theme.of(context).accentColor)
-                              : null,
-                          onTap: () => _toggleSelectedState(snapshot.data.sets[index].id, !snapshot.data.sets[index].included)
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: _getSetRowChildren(snapshot.data.sets[index])
+                                ),
+                              ),
+                            )
                           ),
                         );
                       }
