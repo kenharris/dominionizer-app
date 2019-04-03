@@ -1,7 +1,6 @@
 import 'package:dominionizer_app/blocs/settings_bloc.dart';
 import 'package:dominionizer_app/dialogs/sortDialog.dart';
 import 'package:dominionizer_app/model/dominion_card.dart';
-import 'package:dominionizer_app/widgets/app_settings.dart';
 import 'package:dominionizer_app/widgets/kingom_card_item.dart';
 import 'package:dominionizer_app/widgets/swap_card_snackbar.dart';
 import 'package:dominionizer_app/widgets/undo_swap_card_snackbar.dart';
@@ -12,11 +11,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class KingdomPageState extends State<KingdomPage> {
   final KingdomBloc kingdomBloc = KingdomBloc();
+  final SettingsBloc settingsBloc = SettingsBloc();
 
   KingdomSortType _sortType = KingdomSortType.CardNameAscending;
-
-  int _cardsToShuffle;
-  bool _autoBlacklist;
 
   ScaffoldState _scaffold;
 
@@ -64,11 +61,6 @@ class KingdomPageState extends State<KingdomPage> {
     kingdomBloc.drawNewKingdom();
   }
 
-  void _onAppStateChange(SettingsState appState) {
-    _autoBlacklist = appState.autoBlacklist;
-    _cardsToShuffle = appState.cardsToShuffle;
-  }
-
   void _showDialog() {
     showDialog<int>(
         context: context,
@@ -89,25 +81,18 @@ class KingdomPageState extends State<KingdomPage> {
   void initState() {
     kingdomBloc.kingdomStream.listen(_respondToState);
     kingdomBloc.swapStream.listen(_respondToSwap);
-
+    settingsBloc.initialize();
     super.initState();
   }
 
   @override
   Widget build(BuildContext ctxt) {
-    SettingsBloc appBloc = AppSettingsProvider.of(context);
-    appBloc.appStateStream
-        .where((s) =>
-            s.autoBlacklist != _autoBlacklist ||
-            s.cardsToShuffle != _cardsToShuffle)
-        .listen(_onAppStateChange);
-    appBloc.initialize();
     return Scaffold(
         appBar: AppBar(
           title: Text("Kingdom Page"),
           actions: <Widget>[
             StreamBuilder<SettingsState>(
-                stream: appBloc.appStateStream,
+                stream: settingsBloc.stream,
                 builder: (BuildContext context,
                     AsyncSnapshot<SettingsState> snapshot) {
                   switch (snapshot.connectionState) {

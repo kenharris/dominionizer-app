@@ -2,6 +2,7 @@ import 'package:dominionizer_app/model/dominion_card.dart';
 import 'package:dominionizer_app/pages/card_page.dart';
 import 'package:dominionizer_app/widgets/card_cost.dart';
 import 'package:dominionizer_app/widgets/card_extras.dart';
+import 'package:dominionizer_app/widgets/card_gradient.dart';
 import 'package:flutter/material.dart';
 
 class KingdomCardItem extends StatelessWidget {
@@ -53,73 +54,81 @@ class KingdomCardItem extends StatelessWidget {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: _getBackgroundColor(context),
+          gradient: CardGradient.createLinearGradient(card),
+          // color: _getBackgroundColor(context),
           border: _createBorder(context)
         ),
         child: Padding(
           padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-          child: Table(
-            children: [
-              TableRow(
-                children: [
-                  TableCell(
-                    verticalAlignment: TableCellVerticalAlignment.top,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          card.name, 
-                          textAlign: TextAlign.start,
-                          style: TextStyle(fontSize: fontSize),
+          child: Row(
+            children: <Widget>[
+              // Expanded(
+              //   flex: 1,
+              //   child: Container(
+              //     decoration: BoxDecoration(
+              //       gradient: CardGradient.createLinearGradient(card),
+              //     ),
+              //   ),
+              // ),
+              Expanded(
+                flex: 7,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      card.name, 
+                      textAlign: TextAlign.start,
+                      style: TextStyle(fontSize: fontSize),
+                    ),
+                    Row(
+                      // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Expanded(
+                          flex: 4,
+                          // child: Placeholder()
+                          child: CardCost(
+                            coins: card.coins, 
+                            potions: card.potions, 
+                            debt: card.debt,
+                            compositePile: card.isCompositePile ?? false,
+                            broughtCard: isBroughtCard ?? false,
+                            fontSize: 8,
+                            iconSize: 8,
+                            width: 15
+                          ),
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: <Widget>[
-                            Expanded(
-                              child: CardCost(
-                                coins: card.coins, 
-                                potions: card.potions, 
-                                debt: card.debt,
-                                compositePile: card.isCompositePile ?? false,
-                                broughtCard: isBroughtCard ?? false,
-                                fontSize: 8,
-                                iconSize: 8,
-                                width: 15
-                              ),
+                        Expanded(
+                          flex: 6,
+                          child: Text(
+                            card.types.join(", "),
+                            style: TextStyle(
+                              fontSize: 8
                             ),
-                            Expanded(
-                              child: Text(
-                                card.types.join(", "),
-                                style: TextStyle(
-                                  fontSize: 8
-                                ),
-                              ),
-                            )
-                          ],
+                          ),
                         )
-                      ]
-                    ) 
-                  ),
-                  TableCell(
-                    verticalAlignment: TableCellVerticalAlignment.top,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(
-                          "${card.setName}",
-                          style: TextStyle(fontSize: fontSize),
-                        ),
-                        CardExtras(
-                          bringsCards: card.bringsCards,
-                          isCompositePile: card.isCompositePile,
-                        )
-                      ]
+                      ],
                     )
-                  )
-                ]
+                  ]
+                )
+              ),
+              Expanded(
+                flex: 3,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      "${card.setName}",
+                      style: TextStyle(fontSize: fontSize),
+                    ),
+                    CardExtras(
+                      bringsCards: card.bringsCards,
+                      isCompositePile: card.isCompositePile,
+                    )
+                  ]
+                )
               )
-            ]
-          ),
+            ],
+          )
         ),
       ),
     );

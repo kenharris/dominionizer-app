@@ -1,6 +1,7 @@
 import 'package:dominionizer_app/blocs/card_details_bloc.dart';
 import 'package:dominionizer_app/model/dominion_card.dart';
 import 'package:dominionizer_app/widgets/card_cost.dart';
+import 'package:dominionizer_app/widgets/card_gradient.dart';
 import 'package:dominionizer_app/widgets/card_text.dart';
 import 'package:dominionizer_app/widgets/kingom_card_item.dart';
 import 'package:flutter/material.dart';
@@ -39,42 +40,6 @@ class CardPageState extends State<CardPage> {
       )
     );
 
-    builder.add(
-      Padding(
-        padding:EdgeInsets.all(5),
-        child: Text("${widget._card.sets.join(", ")}"),
-      )
-    );
-
-    builder.add(
-      Padding(
-        padding:EdgeInsets.all(5),
-        child: Text("${widget._card.types.join(", ")}"),
-      )
-    );
-    
-    if (widget._card.totalCost > 0) {
-      builder.add(
-        Padding(
-          padding: EdgeInsets.all(10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("Cost: ", style: TextStyle(fontSize: 18)),
-              CardCost(
-                coins: widget._card.coins,
-                potions: widget._card.potions,
-                debt: widget._card.debt,
-                compositePile: widget._card.isCompositePile,
-                fontSize: 18,
-                iconSize: 10
-              )
-            ]
-          )
-        ),
-      );
-    }
-
     if (widget._card.topText.trim().isNotEmpty || widget._card.bottomText.trim().isNotEmpty) {
       builder.add(
         Padding(
@@ -87,6 +52,43 @@ class CardPageState extends State<CardPage> {
         ),
       );
     }
+
+    builder.add(
+      Padding(
+        padding:EdgeInsets.all(5),
+        child: Row(
+          children: <Widget>[
+            Flexible(
+              flex: 2,
+              fit: FlexFit.tight,
+              child: CardCost(
+                coins: widget._card.coins,
+                potions: widget._card.potions,
+                debt: widget._card.debt,
+                compositePile: widget._card.isCompositePile,
+                fontSize: 18,
+                iconSize: 10
+              )
+            ),
+            Flexible(
+              flex: 4,
+              fit: FlexFit.tight,
+              child: Center(
+                child: Text("${widget._card.types.join(", ")}"),
+              )
+            ),
+            Flexible(
+              flex: 4,
+              fit: FlexFit.tight,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Text("${widget._card.sets.join(", ")}"),
+              )
+            ),
+          ],
+        )
+      )
+    );
 
     return builder.toList();                        
   }
@@ -105,80 +107,114 @@ class CardPageState extends State<CardPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Column(
-                children: _cardInfoWidgets(),
-              ),
-              StreamBuilder<CardDetailsState>(
-                stream: bloc.cardDetailsStream,
-                builder: (BuildContext context,
-                    AsyncSnapshot<CardDetailsState> snapshot) {
-                  if (snapshot.hasData &&
-                      (snapshot.data.constituentCards != null &&
-                          snapshot.data.constituentCards.length > 0)) {
-                    return Container(
-                      padding: EdgeInsets.all(10),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Text(
-                            "This card pile is composed of the following cards:",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: detailFontSize,
-                              fontWeight: FontWeight.bold,
-                              decoration: TextDecoration.underline
-                            )
-                          ),
-                          Column(
-                            children:
-                              snapshot.data.constituentCards.map((dc) => KingdomCardItem(
-                                card: dc,
-                                borders: false,
-                              )
-                            ).toList()
-                          )
-                        ],
+              Flexible(
+                flex: 2,
+                fit: FlexFit.loose,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Theme.of(ctxt).primaryColorDark,
+                      style: BorderStyle.solid,
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                    // gradient: CardGradient.createRadialGradient(widget._card),
+                    gradient: CardGradient.createLinearGradient(widget._card),
+                    // color: Color(0x3300FF00)
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                        color: Colors.white.withAlpha(100)
                       ),
-                    );
-                  } else {
-                    return Container();
-                  }
-                },
-              ),
-              StreamBuilder<CardDetailsState>(
-                stream: bloc.cardDetailsStream,
-                builder: (BuildContext context,
-                    AsyncSnapshot<CardDetailsState> snapshot) {
-                  if (snapshot.hasData &&
-                      (snapshot.data.broughtCards != null &&
-                          snapshot.data.broughtCards.length > 0)) {
-                    return Container(
-                      padding: EdgeInsets.all(10),
                       child: Column(
-                        children: <Widget>[
-                          Text("This card pile brings the following cards:",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: detailFontSize,
-                              fontWeight: FontWeight.bold,
-                              decoration: TextDecoration.underline
-                            )
-                          ),
-                          Column(
-                            children: snapshot.data.broughtCards.map((dc) =>
-                              KingdomCardItem(
-                                card: dc,
-                                borders: false,
-                              )
-                            ).toList()
-                          )
-                        ],
+                        children: _cardInfoWidgets(),
                       ),
-                    );
-                  } else {
-                    return Container();
-                  }
-                },
+                    ),
+                  ),
+                ),
+              ),
+              Flexible(
+                flex: 4,
+                fit: FlexFit.loose,
+                child: StreamBuilder<CardDetailsState>(
+                  stream: bloc.cardDetailsStream,
+                  builder: (BuildContext context,
+                      AsyncSnapshot<CardDetailsState> snapshot) {
+                    if (snapshot.hasData &&
+                        (snapshot.data.constituentCards != null &&
+                            snapshot.data.constituentCards.length > 0)) {
+                      return Container(
+                        padding: EdgeInsets.all(10),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Text(
+                              "This card pile is composed of the following cards:",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: detailFontSize,
+                                fontWeight: FontWeight.bold,
+                                decoration: TextDecoration.underline
+                              )
+                            ),
+                            Column(
+                              children:
+                                snapshot.data.constituentCards.map((dc) => KingdomCardItem(
+                                  card: dc,
+                                  borders: false,
+                                )
+                              ).toList()
+                            )
+                          ],
+                        ),
+                      );
+                    } else {
+                      return Container();
+                    }
+                  },
+                ),
+              ),
+              Flexible(
+                flex: 4,
+                fit: FlexFit.loose,
+                child: StreamBuilder<CardDetailsState>(
+                  stream: bloc.cardDetailsStream,
+                  builder: (BuildContext context,
+                      AsyncSnapshot<CardDetailsState> snapshot) {
+                    if (snapshot.hasData &&
+                        (snapshot.data.broughtCards != null &&
+                            snapshot.data.broughtCards.length > 0)) {
+                      return Container(
+                        padding: EdgeInsets.all(10),
+                        child: Column(
+                          children: <Widget>[
+                            Text("This card pile brings the following cards:",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: detailFontSize,
+                                fontWeight: FontWeight.bold,
+                                decoration: TextDecoration.underline
+                              )
+                            ),
+                            Column(
+                              children: snapshot.data.broughtCards.map((dc) =>
+                                KingdomCardItem(
+                                  card: dc,
+                                  borders: false,
+                                )
+                              ).toList()
+                            )
+                          ],
+                        ),
+                      );
+                    } else {
+                      return Container();
+                    }
+                  },
+                ),
               ),
             ]
           )

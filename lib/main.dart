@@ -1,22 +1,21 @@
+import 'package:dominionizer_app/blocs/theme_bloc.dart';
+import 'package:dominionizer_app/widgets/theme_provider.dart';
 import 'package:flutter/material.dart';
-
 import 'package:dominionizer_app/dominion.dart';
-import 'package:dominionizer_app/blocs/settings_bloc.dart';
-import 'package:dominionizer_app/widgets/app_settings.dart';
 
 void main() {
-  final SettingsBloc appService = SettingsBloc();
+  final ThemeBloc themeService = ThemeBloc();
 
-  runApp(DominionizerApp(appService));
+  runApp(DominionizerApp(themeService));
 }
 
 class DominionizerApp extends StatelessWidget {
-  final SettingsBloc appService;
+  final ThemeBloc themeService;
 
-  DominionizerApp(this.appService);
+  DominionizerApp(this.themeService);
 
   @override
   Widget build(BuildContext context) {
-    return AppSettingsProvider(appBloc: appService, child: RandomizerWidget());
+    return ThemeProvider(themeBloc: themeService, child: RandomizerWidget());
   }
 }

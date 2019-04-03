@@ -1,15 +1,15 @@
+import 'package:dominionizer_app/blocs/states/theme_state.dart';
+import 'package:dominionizer_app/widgets/theme_provider.dart';
 import 'package:flutter/material.dart';
 
-import 'package:dominionizer_app/blocs/settings_bloc.dart';
 import 'package:dominionizer_app/pages.dart';
 import 'package:dominionizer_app/themes/light.dart';
 import 'package:dominionizer_app/themes/dark.dart';
-import 'package:dominionizer_app/widgets/app_settings.dart';
 
 class RandomizerWidgetState extends State<RandomizerWidget> {
   bool _isDarkTheme = false;
 
-  void _reactToState(SettingsState state) {
+  void _reactToState(ThemeState state) {
     if (state != null && _isDarkTheme != state.isDarkTheme) {
       setState(() {
         _isDarkTheme = state.isDarkTheme ?? false;
@@ -19,12 +19,12 @@ class RandomizerWidgetState extends State<RandomizerWidget> {
 
   @override
   Widget build (BuildContext ctxt) {
-    AppSettingsProvider.of(context).appStateStream.listen(_reactToState);
+    ThemeProvider.of(context).appStateStream.listen(_reactToState);
     return MaterialApp(
       title: 'Flutter Demo',
       theme: _isDarkTheme ? DarkThemeData : LightThemeData,
       home: new Scaffold(
-        body: KingdomPage(title: 'Flutter Demo Home Page'),
+        body: KingdomPage(title: 'Randomize Kingdom'),
       ),
     );
   }

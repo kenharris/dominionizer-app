@@ -1,10 +1,13 @@
+import 'package:dominionizer_app/blocs/theme_bloc.dart';
+import 'package:dominionizer_app/widgets/theme_provider.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dominionizer_app/blocs/settings_bloc.dart';
 import 'package:dominionizer_app/dialogs.dart';
-import 'package:dominionizer_app/widgets/app_settings.dart';
 
 class SettingsPageState extends State<SettingsPage> {
+  SettingsBloc settingsBloc = SettingsBloc();
+
   bool _isAutoBlacklist = false;
   bool _isDarkTheme = false;
   int _shuffleSize = 10;
@@ -12,12 +15,12 @@ class SettingsPageState extends State<SettingsPage> {
 
   bool _isDirty;
 
-  SettingsState get settingsState => AppSettingsProvider.of(context).state;
+  ThemeBloc get _themeBloc => ThemeProvider.of(context);
 
   void _updateAllSettings() {
     if (_isDirty) {
-      AppSettingsProvider.of(context)
-          .updateAllSettings(_shuffleSize, _isAutoBlacklist, _isDarkTheme, _eventsProjectsLandmarksIncluded);
+      _themeBloc.changeTheme(_isDarkTheme);
+      settingsBloc.updateAllSettings(_shuffleSize, _isAutoBlacklist, _eventsProjectsLandmarksIncluded);
     }
     Navigator.of(context).pop();
   }
@@ -68,23 +71,23 @@ class SettingsPageState extends State<SettingsPage> {
         }).then((i) => _setEventsProjectsLandmarksIncluded(i));
   }
 
+  void onData(SettingsState event) {
+    setState(() {
+      _isDarkTheme = _themeBloc.state.isDarkTheme;
+      _shuffleSize = event.cardsToShuffle;
+      _isAutoBlacklist = event.autoBlacklist;
+      _eventsProjectsLandmarksIncluded = event.eventsLandmarksProjectsIncluded;
+    });
+  }
+
   @override
   void initState() {
     _isDirty = false;
-
+    settingsBloc.stream.listen(onData);
+    settingsBloc.initialize();
     super.initState();
   }
-
-  @override
-  void didChangeDependencies() {
-    _isAutoBlacklist = settingsState.autoBlacklist;
-    _isDarkTheme = settingsState.isDarkTheme;
-    _shuffleSize = settingsState.cardsToShuffle;
-    _eventsProjectsLandmarksIncluded =settingsState.eventsLandmarksProjectsIncluded;
-
-    super.didChangeDependencies();
-  }
-
+    
   @override
   Widget build(BuildContext ctxt) {
     return Scaffold(
