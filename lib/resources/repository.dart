@@ -4,8 +4,8 @@ import 'package:dominionizer_app/blocs/states/kingdom_state.dart';
 import 'database.dart';
 import 'sharedpreferences.dart';
 
-import '../model/dominion_set.dart';
-import '../model/dominion_card.dart';
+import 'package:dominionizer_app/model/dominion_set.dart';
+import 'package:dominionizer_app/model/dominion_card.dart';
 
 class Repository {
   final databaseProvider = DBProvider.db;

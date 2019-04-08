@@ -32,7 +32,7 @@ class CardCost extends StatelessWidget {
             )
           ),
           child: Padding(
-            padding: const EdgeInsets.all(2.0),
+            padding: EdgeInsets.all(size / 6),
             child: Text("$coins", style: lightStyle),
           )
         ));
@@ -59,7 +59,8 @@ class CardCost extends StatelessWidget {
               color: Colors.brown,
             ),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(4.0, 2.0, 4.0, 2.0),
+              // padding: const EdgeInsets.fromLTRB(4.0, 2.0, 4.0, 2.0),
+              padding: EdgeInsets.fromLTRB(size / 4, size / 6, size / 4, size / 6),
               child: Text("$debt", style: darkStyle),
             ),
           )

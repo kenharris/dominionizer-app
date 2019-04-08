@@ -5,19 +5,20 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 class CardExtras extends StatelessWidget {
   final bool bringsCards, isCompositePile;
   final double iconSize;
+  final Color color;
 
-  CardExtras({ this.bringsCards, this.isCompositePile, this.iconSize });
+  CardExtras({ this.bringsCards, this.isCompositePile, this.iconSize, @required this.color });
 
   @override
   Widget build(BuildContext context) {
     List<Widget> builder = List<Widget>();
 
     if (bringsCards ?? false) {
-      builder.add(Icon(Icons.more, size: this.iconSize ?? 14));
+      builder.add(Icon(Icons.more, size: this.iconSize ?? 14, color: color,));
     }
 
     if (isCompositePile ?? false) {
-      builder.add(Icon(Icons.queue, size: this.iconSize ?? 14));
+      builder.add(Icon(Icons.queue, size: this.iconSize ?? 14, color: color,));
     }
 
     if (builder.length == 0) {

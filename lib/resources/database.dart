@@ -3,8 +3,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'dart:io';
 import 'dart:typed_data';
-import '../model/dominion_set.dart';
-import '../model/dominion_card.dart';
+import 'package:dominionizer_app/model/dominion_set.dart';
+import 'package:dominionizer_app/model/dominion_card.dart';
 import 'package:flutter/services.dart';
 
 class DBProvider {
@@ -23,7 +23,7 @@ class DBProvider {
   initDB() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path =
-        join(documentsDirectory.path, "dominionizer-includes-blacklist.db");
+        join(documentsDirectory.path, "dominionizer-20190407.db");
 
     if (FileSystemEntity.typeSync(path) == FileSystemEntityType.notFound) {
       ByteData data = await rootBundle.load(join('assets', 'dominionizer.db'));
@@ -91,7 +91,7 @@ class DBProvider {
     StringBuffer sb = StringBuffer();
     sb.write(" SELECT c.*, ");
     sb.write(
-        " (select group_concat(name) from sets s inner join cardsets cs on cs.set_id = s.id where cs.card_id = c.id) as set_names, ");
+        " (select group_concat(short_name) from sets s inner join cardsets cs on cs.set_id = s.id where cs.card_id = c.id) as set_names, ");
     sb.write(
         " (select group_concat(name) from types t inner join cardtypes ct on ct.type_id = t.id where ct.card_id = c.id) as type_names ");
     sb.write(" FROM cards c ");
@@ -193,7 +193,7 @@ class DBProvider {
     StringBuffer sb = StringBuffer();
     sb.write(" SELECT c.*, ");
     sb.write(
-        " (select group_concat(name) from sets s inner join cardsets cs on cs.set_id = s.id where cs.card_id = c.id) as set_names, ");
+        " (select group_concat(short_name) from sets s inner join cardsets cs on cs.set_id = s.id where cs.card_id = c.id) as set_names, ");
     sb.write(
         " (select group_concat(name) from types t inner join cardtypes ct on ct.type_id = t.id where ct.card_id = c.id) as type_names ");
     sb.write(" FROM broughtcards bc ");
@@ -217,7 +217,7 @@ class DBProvider {
     StringBuffer sb = StringBuffer();
     sb.write(" SELECT c.*, ");
     sb.write(
-        " (select group_concat(name) from sets s inner join cardsets cs on cs.set_id = s.id where cs.card_id = c.id) as set_names, ");
+        " (select group_concat(short_name) from sets s inner join cardsets cs on cs.set_id = s.id where cs.card_id = c.id) as set_names, ");
     sb.write(
         " (select group_concat(name) from types t inner join cardtypes ct on ct.type_id = t.id where ct.card_id = c.id) as type_names ");
     sb.write(" FROM pilecompositions pc ");
@@ -258,7 +258,7 @@ class DBProvider {
 
     String query = '''
     SELECT c.*,
-    (select group_concat(name) from sets s inner join cardsets cs on cs.set_id = s.id where cs.card_id = c.id) as set_names,
+    (select group_concat(short_name) from sets s inner join cardsets cs on cs.set_id = s.id where cs.card_id = c.id) as set_names,
     (select group_concat(name) from types t inner join cardtypes ct on ct.type_id = t.id where ct.card_id = c.id) as type_names
     FROM cards c
     WHERE c.id IN

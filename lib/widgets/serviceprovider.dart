@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../blocs/sets_bloc.dart';
+import 'package:dominionizer_app/blocs/sets_bloc.dart';
 
 class ServiceProviderWidget extends InheritedWidget {
   final SetsBloc setsBloc = SetsBloc();

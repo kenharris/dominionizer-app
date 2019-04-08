@@ -5,6 +5,32 @@ import 'package:dominionizer_app/widgets/card_extras.dart';
 import 'package:dominionizer_app/widgets/card_gradient.dart';
 import 'package:flutter/material.dart';
 
+class KingdomCardItemTextStyle {
+  static TextStyle create(double fontSize) {
+    return TextStyle(
+      color: Colors.white,
+      fontSize: fontSize,
+      shadows: [
+        Shadow( // bottomLeft
+          offset: Offset(-1, -1),
+          color: Colors.black
+        ),
+        Shadow( // bottomRight
+          offset: Offset(1, -1),
+          color: Colors.black
+        ),
+        Shadow( // topRight
+          offset: Offset(1, 1),
+          color: Colors.black
+        ),
+        Shadow( // topLeft
+          offset: Offset(-1, 1),
+          color: Colors.black
+        ),
+      ]
+    );
+  }
+}
 class KingdomCardItem extends StatelessWidget {
   final DominionCard card;
   final bool isBroughtCard, isEventProjectOrLandmark, topBorder, borders;
@@ -18,7 +44,8 @@ class KingdomCardItem extends StatelessWidget {
       if (topBorder) {
         return BorderDirectional(
           top: BorderSide(
-            color: Theme.of(context).accentColor,
+            // color: Theme.of(context).accentColor,
+            color: Colors.black,
             width: 2
           )
         );
@@ -62,14 +89,6 @@ class KingdomCardItem extends StatelessWidget {
           padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
           child: Row(
             children: <Widget>[
-              // Expanded(
-              //   flex: 1,
-              //   child: Container(
-              //     decoration: BoxDecoration(
-              //       gradient: CardGradient.createLinearGradient(card),
-              //     ),
-              //   ),
-              // ),
               Expanded(
                 flex: 7,
                 child: Column(
@@ -78,7 +97,7 @@ class KingdomCardItem extends StatelessWidget {
                     Text(
                       card.name, 
                       textAlign: TextAlign.start,
-                      style: TextStyle(fontSize: fontSize),
+                      style: KingdomCardItemTextStyle.create(fontSize)
                     ),
                     Row(
                       // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -101,9 +120,7 @@ class KingdomCardItem extends StatelessWidget {
                           flex: 6,
                           child: Text(
                             card.types.join(", "),
-                            style: TextStyle(
-                              fontSize: 8
-                            ),
+                            style: KingdomCardItemTextStyle.create(8)
                           ),
                         )
                       ],
@@ -118,11 +135,12 @@ class KingdomCardItem extends StatelessWidget {
                   children: [
                     Text(
                       "${card.setName}",
-                      style: TextStyle(fontSize: fontSize),
+                      style: KingdomCardItemTextStyle.create(fontSize),
                     ),
                     CardExtras(
                       bringsCards: card.bringsCards,
                       isCompositePile: card.isCompositePile,
+                      color: Colors.white,
                     )
                   ]
                 )
