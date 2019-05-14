@@ -1,3 +1,4 @@
+import 'package:dominionizer_app/pages/card_category_page.dart';
 import 'package:dominionizer_app/widgets/drawer.dart';
 import 'package:flutter/material.dart';
 
@@ -97,12 +98,22 @@ class RulesPageState extends State<RulesPage> {
                               itemCount: snapshot.data.categories.length,
                               itemBuilder: (BuildContext context, int index) {
                                 return ListTile(
+                                  onTap: () => Navigator.push(
+                                    context,
+                                    new MaterialPageRoute(
+                                      builder: (ctxt) => 
+                                      new CardCategoryPage(
+                                        title: "Category: ${snapshot.data.categories[index].name}",
+                                        categoryId: snapshot.data.categories[index].id
+                                      )
+                                    ),
+                                  ),
                                   title: Text("${snapshot.data.categories[index].name} (${snapshot.data.categories[index].count})"),
                                   subtitle: Text(snapshot.data.categories[index].description),
                                   trailing: Switch(
                                     value: snapshot.data.getCategoryValue(snapshot.data.categories[index].id),
-                                    onChanged: (newValue) async {
-                                      await rulesBloc.updateRule(snapshot.data.categories[index].id, newValue);
+                                    onChanged: (newValue) {
+                                      rulesBloc.updateRule(snapshot.data.categories[index].id, newValue);
                                     },
                                   ),
                                   // onTap: () => _showDialog(),

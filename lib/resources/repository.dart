@@ -71,4 +71,6 @@ class Repository {
   Future<List<CategoryValue>> getCategoryValues() async => await prefs.getCategoryValues();
   Future setCategoryValue(int categoryId, bool newValue) async => await prefs.setCategoryValue(categoryId, newValue);
   Future<List<CardCategory>> getCardCategories() async => await databaseProvider.getCardCategories();
+
+  Future<List<DominionCard>> getCategoryCards(int categoryId) async => await databaseProvider.getCategoryCards(categoryId);
 }

@@ -144,7 +144,6 @@ class DBProvider {
     whereClauses.add(" c.blacklisted = 0 ");
     whereClauses.add(" c.id NOT IN (${excludedCardIds.join(",")}) ");
 
-
     List<DominionCard> cards = List<DominionCard>();
     for (var i=0; i<categoryIds.length; i++) {
       List<String> clauses = [];
@@ -321,6 +320,19 @@ class DBProvider {
     }
   }
 
+  Future<List<DominionCard>> getCategoryCards(categoryId) async {
+    List<String> whereClauses = [];
+    whereClauses.add(" c.in_supply = 1 ");
+    whereClauses.add(" c.blacklisted = 0 ");
+    whereClauses.add(''' c.id IN (
+        SELECT cards.id FROM categories 
+        INNER JOIN cardcategories ON categories.id = cardcategories.category_id 
+        INNER JOIN cards ON cards.id = cardcategories.card_id 
+        WHERE categories.id = $categoryId
+      ) ''');
+    return await _getCards(whereClauses, "c.name", 0);
+  }
+
   Future clearBlacklist() async {
     final db = await database;
 
@@ -363,7 +375,8 @@ class DBProvider {
     sb.write(" inner join cards c ");
     sb.write(" on c.id = cc.card_id ");
     sb.write(" WHERE cc.category_id = cat.id ");
-    sb.write(" AND c.blacklisted = 0) count");
+    sb.write(" AND c.blacklisted = 0 ");
+    sb.write(" AND c.in_supply = 1) count");
     sb.write(" FROM categories cat ");
 
     var res = await db.rawQuery(sb.toString());
@@ -374,6 +387,5 @@ class DBProvider {
     } else {
       return List<CardCategory>();
     }
-
   }
 }
