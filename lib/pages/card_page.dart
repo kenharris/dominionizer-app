@@ -96,7 +96,7 @@ class CardPageState extends State<CardPage> {
   Widget build(BuildContext ctxt) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Card Details"),
+        title: Text(widget._card.name),
       ),
       body: Padding(
         padding: EdgeInsets.fromLTRB(30, 10, 30, 10),

@@ -1,4 +1,5 @@
 import 'package:dominionizer_app/pages/blacklist_page.dart';
+import 'package:dominionizer_app/pages/rules_page.dart';
 import 'package:flutter/material.dart';
 import 'package:dominionizer_app/pages.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -58,6 +59,17 @@ class _MyDrawerState extends State<MyDrawer> {
               Navigator.push(
                 context,
                 new MaterialPageRoute(builder: (ctx) => new BlacklistPage(title: "Manage Blacklist"))
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(FontAwesomeIcons.list),
+            title: Text('Rules'),
+            onTap: () {
+              Navigator.of(context).pop();
+              Navigator.push(
+                context,
+                new MaterialPageRoute(builder: (ctx) => new RulesPage(title: "Rules"))
               );
             },
           ),

@@ -1,3 +1,4 @@
+import 'package:dominionizer_app/blocs/states/rules_state.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
@@ -23,7 +24,7 @@ class DBProvider {
   initDB() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path =
-        join(documentsDirectory.path, "dominionizer-20190407.db");
+        join(documentsDirectory.path, "dominionizer-20190513.db");
 
     if (FileSystemEntity.typeSync(path) == FileSystemEntityType.notFound) {
       ByteData data = await rootBundle.load(join('assets', 'dominionizer.db'));
@@ -93,7 +94,9 @@ class DBProvider {
     sb.write(
         " (select group_concat(short_name) from sets s inner join cardsets cs on cs.set_id = s.id where cs.card_id = c.id) as set_names, ");
     sb.write(
-        " (select group_concat(name) from types t inner join cardtypes ct on ct.type_id = t.id where ct.card_id = c.id) as type_names ");
+        " (select group_concat(name) from types t inner join cardtypes ct on ct.type_id = t.id where ct.card_id = c.id) as type_names, ");
+    sb.write(
+        " (select group_concat(name) from categories cat inner join cardcategories cc on cc.category_id = cat.id where cc.card_id = c.id) as category_names ");
     sb.write(" FROM cards c ");
 
     if (whereClauses != null && whereClauses.length > 0) {
@@ -133,6 +136,33 @@ class DBProvider {
     ) ''');
 
     return await _getCards(whereClauses, "RANDOM()", numberOfCards);
+  }
+
+  Future<List<DominionCard>> drawCardsOfCategories(List<int> categoryIds, List<int> excludedCardIds) async {
+    List<String> whereClauses = [];
+    whereClauses.add(" c.in_supply = 1 ");
+    whereClauses.add(" c.blacklisted = 0 ");
+    whereClauses.add(" c.id NOT IN (${excludedCardIds.join(",")}) ");
+
+
+    List<DominionCard> cards = List<DominionCard>();
+    for (var i=0; i<categoryIds.length; i++) {
+      List<String> clauses = [];
+      clauses.add(''' c.id IN (
+        SELECT cards.id FROM categories 
+        INNER JOIN cardcategories ON categories.id = cardcategories.category_id 
+        INNER JOIN cards ON cards.id = cardcategories.card_id 
+        WHERE categories.id = ${categoryIds[i]}
+      ) ''');
+      clauses.addAll(whereClauses);
+
+      var extraCards = await _getCards(clauses, "RANDOM()", 1);
+      if (extraCards != null && extraCards.length > 0) {
+        cards.add(extraCards.first);
+      }
+    }
+
+    return cards;
   }
 
   Future<DominionCard> getReplacementKingdomCard(List<int> cardIds, List<int> setsToInclude) async {
@@ -321,5 +351,29 @@ class DBProvider {
     sb.write(" WHERE id IN (${cardIds.map((c) => "?").join(",")})");
 
     db.rawUpdate(sb.toString(), cardIds);
+  }
+
+  Future<List<CardCategory>> getCardCategories() async {
+    final db = await database;
+
+    StringBuffer sb = StringBuffer();
+    sb.write(" SELECT cat.*, ");
+    sb.write(" (select count(*) ");
+    sb.write(" from cardcategories cc ");
+    sb.write(" inner join cards c ");
+    sb.write(" on c.id = cc.card_id ");
+    sb.write(" WHERE cc.category_id = cat.id ");
+    sb.write(" AND c.blacklisted = 0) count");
+    sb.write(" FROM categories cat ");
+
+    var res = await db.rawQuery(sb.toString());
+    if (res.isNotEmpty) {
+      List<CardCategory> categories =
+          res.map((cc) => CardCategory.fromMap(cc)).toList();
+      return categories;
+    } else {
+      return List<CardCategory>();
+    }
+
   }
 }

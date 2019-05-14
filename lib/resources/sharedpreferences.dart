@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:core';
 import 'package:dominionizer_app/blocs/states/kingdom_state.dart';
+import 'package:dominionizer_app/blocs/states/rules_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPreferencesProvider {
@@ -11,6 +12,7 @@ class SharedPreferencesProvider {
   static const String LATEST_KINGDOM = 'LatestKingdom';
   static const String EVENTS_LANDMARKS_PROJECTS_INCLUDED =
       'EventsLandmarksProjectsIncluded';
+  static const String CATEGORY_VALUES = 'CategoryVaues';
 
   SharedPreferencesProvider._();
   static final SharedPreferencesProvider spp = SharedPreferencesProvider._();
@@ -99,4 +101,21 @@ class SharedPreferencesProvider {
   Future setEventsLandmarksProjectsIncluded(
           int eventsProjectsLandmarksIncluded) async =>
       await _setInt(EVENTS_LANDMARKS_PROJECTS_INCLUDED, eventsProjectsLandmarksIncluded);
+
+  Future<List<CategoryValue>> getCategoryValues() async {
+    var str = await _getString(CATEGORY_VALUES);
+    var decoded = jsonDecode(str ?? "[]") as List;
+    return decoded
+                ?.map((cv) => CategoryValue.fromJson(jsonDecode(cv)))
+                ?.toList() ??
+            [];
+  }
+
+  Future setCategoryValue(int categoryId, bool newValue) async {
+    var catValues = await getCategoryValues();
+    catValues.removeWhere((cv) => cv.id == categoryId);
+    catValues.add(CategoryValue(categoryId, newValue));
+    var str = jsonEncode(catValues.map((cv) => cv.toJson()).toList());
+    await _setString(CATEGORY_VALUES, str);
+  }
 }

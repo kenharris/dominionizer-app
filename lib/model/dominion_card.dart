@@ -17,6 +17,7 @@ class DominionCard {
   String name;
   List<String> types;
   List<String> sets;
+  List<String> categories;
   int coins;
   int potions;
   int debt;
@@ -35,6 +36,7 @@ class DominionCard {
       'name' : name,
       'sets' : jsonEncode(sets),
       'types' : jsonEncode(types),
+      'categories' : jsonEncode(categories),
       'coins' : coins,
       'potions' : potions,
       'debt' : debt,
@@ -52,6 +54,7 @@ class DominionCard {
       name = json['name'],
       sets = json['sets'] == null ? [] : (jsonDecode(json['sets']) as List<dynamic>).cast<String>(),
       types = json['types'] == null ? [] : (jsonDecode(json['types']) as List<dynamic>).cast<String>(),
+      categories = json['categories'] == null ? [] : (jsonDecode(json['categories']) as List<dynamic>).cast<String>(),
       coins = json['coins'] ?? 0,
       potions = json['potions'] ?? 0,
       debt = json['debt'] ?? 0,
@@ -66,6 +69,7 @@ class DominionCard {
       name = map['name'],
       sets = (map['set_names'] ?? "").toString().split(","),
       types = (map['type_names'] ?? "").toString().split(","),
+      categories = map['category_names']?.toString()?.split(",") ?? List<String>(),
       coins = map['coins'] ?? 0,
       potions = map['potions'] ?? 0,
       debt = map['debt'] ?? 0,

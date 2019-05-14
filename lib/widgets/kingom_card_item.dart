@@ -117,9 +117,16 @@ class KingdomCardItem extends StatelessWidget {
                           ),
                         ),
                         Expanded(
-                          flex: 6,
+                          flex: 3,
                           child: Text(
-                            card.types.join(", "),
+                            "${card.types.join(", ")}",
+                            style: KingdomCardItemTextStyle.create(8)
+                          ),
+                        ),
+                        Expanded(
+                          flex: 3,
+                          child: Text(
+                            "${card.categories.join(", ")}",
                             style: KingdomCardItemTextStyle.create(8)
                           ),
                         )

@@ -89,7 +89,7 @@ class KingdomPageState extends State<KingdomPage> {
   Widget build(BuildContext ctxt) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Kingdom Page"),
+          title: Text("Current Kingdom"),
           actions: <Widget>[
             StreamBuilder<SettingsState>(
                 stream: settingsBloc.stream,

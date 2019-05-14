@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:dominionizer_app/blocs/states/kingdom_state.dart';
+import 'package:dominionizer_app/blocs/states/rules_state.dart';
 
 import 'database.dart';
 import 'sharedpreferences.dart';
@@ -17,8 +18,8 @@ class Repository {
       databaseProvider.updateSetInclusion(id, included);
   Future updateAllSetsInclusion(bool included) =>
       databaseProvider.updateAllSetsInclusion(included);
-  Future<List<DominionCard>> drawKingdomCards(List<int> sets, int limit) =>
-      databaseProvider.drawKingdomCards(sets, limit);
+  Future<List<DominionCard>> drawKingdomCards(List<int> sets, int limit) async =>
+      await databaseProvider.drawKingdomCards(sets, limit);
   Future<DominionCard> swapKingdomCard(List<int> cardIds, List<int> sets) =>
       databaseProvider.getReplacementKingdomCard(cardIds, sets);
   Future<DominionCard> swapEventLandmarkProjectCard(List<int> cardIds, bool events, bool landmarks, bool projects) =>
@@ -31,6 +32,9 @@ class Repository {
           List<int> setIds, int limit, bool events, bool landmarks, bool projects) =>
       databaseProvider.getEventsLandmarksAndProjects(
           setIds, limit, events, landmarks, projects);
+
+  Future<List<DominionCard>> drawCardsOfCategories(List<int> categoryIds, List<int> excludedCardIds) async =>
+      await databaseProvider.drawCardsOfCategories(categoryIds, excludedCardIds);
 
   Future resetBlacklist() async => await databaseProvider.clearBlacklist();
   Future blacklistCards(List<int> cardIds) async =>
@@ -63,4 +67,8 @@ class Repository {
   Future<int> getEventsLandmarksProjectsIncluded() async => await prefs.getEventsLandmarksProjectsIncluded() ?? 2;
   Future<void> setEventsLandmarksProjectsIncluded(int eventsProjectsLandmarksIncluded) async =>
       await prefs.setEventsLandmarksProjectsIncluded(eventsProjectsLandmarksIncluded);
+
+  Future<List<CategoryValue>> getCategoryValues() async => await prefs.getCategoryValues();
+  Future setCategoryValue(int categoryId, bool newValue) async => await prefs.setCategoryValue(categoryId, newValue);
+  Future<List<CardCategory>> getCardCategories() async => await databaseProvider.getCardCategories();
 }

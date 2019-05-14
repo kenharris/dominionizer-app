@@ -135,6 +135,42 @@ class KingdomBloc {
           (await _repository.fetchIncludedSets()).map((si) => si.id).toList();
       int shuffleSize = await _repository.getShuffleSize();
       _cards = await _repository.drawKingdomCards(setIds, shuffleSize);
+
+      // Check to see if we have categories to satisfy, and if we have done so.
+      var categoryValues = await _repository.getCategoryValues();
+      if (categoryValues.any((cv) => cv.included)) {
+        List<int> missingCategoryIds = List<int>();
+        var extraCards = List<DominionCard>();
+        var includedCategories = categoryValues.where((cv) => cv.included).toList();
+        var categories = await _repository.getCardCategories();
+        var includedCategoryNames = includedCategories.map((ic) => categories.where((c) => c.id == ic.id).first.name).toList();
+
+        bool categoryMissing = false;
+        for (int i=0; i<includedCategoryNames.length; i++) {
+          var categoryName = includedCategoryNames[i];
+          if (!_cards.any((c) => c.categories.any((cat) => cat == categoryName))) {
+            categoryMissing = true;
+          }
+
+          if (categoryMissing) {
+            missingCategoryIds.add(includedCategories[i].id);
+          }
+        }
+
+        List<int> currentCardIds = _cards.map((c) => c.id).toList();
+        if (missingCategoryIds.length > 0) {
+          extraCards = await _repository.drawCardsOfCategories(missingCategoryIds, currentCardIds);
+        }
+
+        int j = 0;
+        while (extraCards.length > 0 && j <= _cards.length) {
+          if (!_cards[j].categories.any((c) => includedCategoryNames.any((ic) => ic == c))) {
+            _cards[j] = extraCards.removeLast();
+          }
+          j++;
+        }
+      }
+
       _broughtCards = await _getBroughtCards(_cards
           .map((dc) => dc.bringsCards ? dc.id : null)
           .where((id) => id != null)

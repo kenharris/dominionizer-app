@@ -77,7 +77,7 @@ class BlacklistPageState extends State<BlacklistPage> {
   Widget build(BuildContext ctxt) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Blacklist Page"),
+          title: Text("Blacklisted Cards"),
           actions: <Widget>[
             IconButton(
               icon: Icon(Icons.clear),
