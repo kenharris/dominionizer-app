@@ -14,11 +14,11 @@ class CardExtras extends StatelessWidget {
     List<Widget> builder = List<Widget>();
 
     if (bringsCards ?? false) {
-      builder.add(Icon(Icons.more, size: this.iconSize ?? 14, color: color,));
+      builder.add(Icon(Icons.add_circle, size: this.iconSize ?? 14, color: color,));
     }
 
     if (isCompositePile ?? false) {
-      builder.add(Icon(Icons.queue, size: this.iconSize ?? 14, color: color,));
+      builder.add(Icon(FontAwesomeIcons.layerGroup, size: this.iconSize ?? 14, color: color,));
     }
 
     if (builder.length == 0) {
@@ -26,7 +26,7 @@ class CardExtras extends StatelessWidget {
     }
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: builder.toList(),
     );
   }

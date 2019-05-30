@@ -1,95 +1,42 @@
-import 'package:dominionizer_app/blocs/theme_bloc.dart';
-import 'package:dominionizer_app/widgets/theme_provider.dart';
+import 'package:dominionizer_app/model/appsettings_model.dart';
 import 'package:flutter/material.dart';
 
-import 'package:dominionizer_app/blocs/settings_bloc.dart';
 import 'package:dominionizer_app/dialogs.dart';
+import 'package:provider/provider.dart';
 
 class SettingsPageState extends State<SettingsPage> {
-  SettingsBloc settingsBloc = SettingsBloc();
+  AppSettingsModel appSettingsModel;
 
-  bool _isAutoBlacklist = false;
-  bool _isDarkTheme = false;
-  int _shuffleSize = 10;
-  int _eventsProjectsLandmarksIncluded = 2;
-
-  bool _isDirty;
-
-  ThemeBloc get _themeBloc => ThemeProvider.of(context);
-
-  void _updateAllSettings() {
-    if (_isDirty) {
-      _themeBloc.changeTheme(_isDarkTheme);
-      settingsBloc.updateAllSettings(_shuffleSize, _isAutoBlacklist, _eventsProjectsLandmarksIncluded);
-    }
-    Navigator.of(context).pop();
+  void _updateSuffleSize(int shuffleSize) {
+    Provider.of<AppSettingsModel>(context).shuffleSize = shuffleSize;
   }
 
-  void _updateSuffleSize(int s) {
-    setState(() {
-      _isDirty = true;
-      _shuffleSize = s;
-    });
+  void _setEventsProjectsLandmarksIncluded(int eventsLandmarksProjectsIncluded) {
+    Provider.of<AppSettingsModel>(context).eventsLandmarksProjectsIncluded = eventsLandmarksProjectsIncluded;
   }
 
-  void _setAutoBlacklist(bool val) {
-    setState(() {
-      _isDirty = true;
-      _isAutoBlacklist = val;
-    });
-  }
-
-  void _setDarkTheme(bool val) {
-    setState(() {
-      _isDirty = true;
-      _isDarkTheme = val;
-    });
-  }
-
-  void _setEventsProjectsLandmarksIncluded(int val) {
-    setState(() {
-      _isDirty = true;
-      _eventsProjectsLandmarksIncluded = val;
-    });
-  }
-
-  void _showDialog() {
+  void _showDialog(int shuffleSize) {
     showDialog<int>(
         context: context,
         builder: (BuildContext context) {
           return IntListDialog(
-              [6, 7, 8, 9, 10, 11, 12, 13, 14, 15], _shuffleSize, 10);
-        }).then((i) => _updateSuffleSize(i));
+              [6, 7, 8, 9, 10, 11, 12, 13, 14, 15], shuffleSize, 10);
+        }).then((i) { if (i != null) _updateSuffleSize(i); });
   }
 
-  void _showEventsLandmarksProjectsDialog() {
+  void _showEventsLandmarksProjectsDialog(int eventsProjectsLandmarksIncluded) {
     showDialog<int>(
         context: context,
         builder: (BuildContext context) {
           return IntListDialog(
-              [0, 1, 2, 3], _eventsProjectsLandmarksIncluded, 2);
-        }).then((i) => _setEventsProjectsLandmarksIncluded(i));
+              [0, 1, 2, 3], eventsProjectsLandmarksIncluded, 2);
+        }).then((i) { if (i != null) _setEventsProjectsLandmarksIncluded(i); });
   }
 
-  void onData(SettingsState event) {
-    setState(() {
-      _isDarkTheme = _themeBloc.state.isDarkTheme;
-      _shuffleSize = event.cardsToShuffle;
-      _isAutoBlacklist = event.autoBlacklist;
-      _eventsProjectsLandmarksIncluded = event.eventsLandmarksProjectsIncluded;
-    });
-  }
-
-  @override
-  void initState() {
-    _isDirty = false;
-    settingsBloc.stream.listen(onData);
-    settingsBloc.initialize();
-    super.initState();
-  }
-    
   @override
   Widget build(BuildContext ctxt) {
+    appSettingsModel = Provider.of<AppSettingsModel>(context);
+
     return Scaffold(
         appBar: AppBar(
           title: Text(widget.title),
@@ -100,46 +47,44 @@ class SettingsPageState extends State<SettingsPage> {
             ListView(
               shrinkWrap: true,
               children: <Widget>[
-                ListTile(
-                  title: const Text("Number of cards to be shuffled"),
-                  subtitle: const Text("Choose large or small shuffles."),
-                  trailing: Text("$_shuffleSize"),
-                  onTap: () => _showDialog(),
+                Consumer<AppSettingsModel>(
+                  builder: (context, appSettings, child) {
+                    return ListTile(
+                      title: const Text("Number of cards to be shuffled"),
+                      subtitle: const Text("Choose large or small shuffles."),
+                      trailing: Text("${appSettings.shuffleSize}"),
+                      onTap: () => _showDialog(appSettings.shuffleSize),
+                    );
+                  },
                 ),
-                ListTile(
-                  title: const Text("How many events/landmarks/projects?"),
-                  subtitle: const Text("Randomly include up to this number."),
-                  trailing: Text("$_eventsProjectsLandmarksIncluded"),
-                  onTap: () => _showEventsLandmarksProjectsDialog(),
+                Consumer<AppSettingsModel>(
+                  builder: (context, appSettings, child) {
+                    return ListTile(
+                      title: const Text("How many events/landmarks/projects?"),
+                      subtitle: const Text("Randomly include up to this number."),
+                      trailing: Text("${appSettings.eventsLandmarksProjectsIncluded}"),
+                      onTap: () => _showEventsLandmarksProjectsDialog(appSettings.eventsLandmarksProjectsIncluded),
+                    );
+                  },
                 ),
-                ListTile(
-                    title: const Text("Auto-blacklist kingdom on new shuffle"),
-                    subtitle: const Text(
-                        "Play with lesser-known cards by building up a big blacklist."),
-                    trailing: Checkbox(
-                      activeColor: Theme.of(context).accentColor,
-                      value: _isAutoBlacklist,
-                      onChanged: (b) => _setAutoBlacklist(!_isAutoBlacklist),
-                    ),
-                    onTap: () => _setAutoBlacklist(!_isAutoBlacklist)),
-                ListTile(
-                    title: const Text("Use dark theme"),
-                    subtitle: const Text("Join the dark side."),
-                    trailing: Checkbox(
-                      activeColor: Theme.of(context).accentColor,
-                      value: _isDarkTheme,
-                      onChanged: (b) => _setDarkTheme(!_isDarkTheme),
-                    ),
-                    onTap: () => _setDarkTheme(!_isDarkTheme)),
+                Consumer<AppSettingsModel>(
+                  builder: (context, appSettings, child) {
+                    return ListTile(
+                      title: const Text("Auto-blacklist kingdom on new shuffle"),
+                      subtitle: const Text(
+                          "Play with lesser-known cards by building up a big blacklist."),
+                      trailing: Checkbox(
+                        activeColor: Theme.of(context).accentColor,
+                        value: appSettings.autoBlacklist,
+                        onChanged: (b) => 
+                          appSettings.autoBlacklist = !appSettings.autoBlacklist,
+                      ),
+                      onTap: () => 
+                        appSettings.autoBlacklist = !appSettings.autoBlacklist
+                    );
+                  }
+                )
               ],
-            ),
-            RaisedButton(
-              child: _isDirty
-                  ? Text(
-                      "Save Settings",
-                    )
-                  : Text("No Changes"),
-              onPressed: _isDirty ? _updateAllSettings : null,
             ),
             Expanded(
               child: Align(
@@ -150,7 +95,8 @@ class SettingsPageState extends State<SettingsPage> {
                   )),
             ),
           ],
-        ));
+        )
+      );
   }
 }
 

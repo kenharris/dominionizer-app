@@ -1,4 +1,3 @@
-import 'package:dominionizer_app/blocs/settings_bloc.dart';
 import 'package:dominionizer_app/dialogs/sortDialog.dart';
 import 'package:dominionizer_app/model/dominion_card.dart';
 import 'package:dominionizer_app/widgets/kingom_card_item.dart';
@@ -11,7 +10,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class KingdomPageState extends State<KingdomPage> {
   final KingdomBloc kingdomBloc = KingdomBloc();
-  final SettingsBloc settingsBloc = SettingsBloc();
 
   KingdomSortType _sortType = KingdomSortType.CardNameAscending;
 
@@ -47,10 +45,9 @@ class KingdomPageState extends State<KingdomPage> {
         _scaffold.showSnackBar(SnackBar(
           backgroundColor: Theme.of(context).buttonColor,
           content: SwapCardSnackbar(
-            initialCardName: state.initialCard.name,
-            swappedCardName: state.swappedCard.name,
-            undoFunc: () => kingdomBloc.undoExchange()
-          ),
+              initialCardName: state.initialCard.name,
+              swappedCardName: state.swappedCard.name,
+              undoFunc: () => kingdomBloc.undoExchange()),
           duration: const Duration(seconds: 2),
         ));
       }
@@ -81,7 +78,6 @@ class KingdomPageState extends State<KingdomPage> {
   void initState() {
     kingdomBloc.kingdomStream.listen(_respondToState);
     kingdomBloc.swapStream.listen(_respondToSwap);
-    settingsBloc.initialize();
     super.initState();
   }
 
@@ -91,20 +87,10 @@ class KingdomPageState extends State<KingdomPage> {
         appBar: AppBar(
           title: Text("Current Kingdom"),
           actions: <Widget>[
-            StreamBuilder<SettingsState>(
-                stream: settingsBloc.stream,
-                builder: (BuildContext context,
-                    AsyncSnapshot<SettingsState> snapshot) {
-                  switch (snapshot.connectionState) {
-                    case ConnectionState.waiting:
-                      return const CircularProgressIndicator();
-                    default:
-                      return IconButton(
-                        icon: Icon(FontAwesomeIcons.dice),
-                        onPressed: _newShuffle,
-                      );
-                  }
-                }),
+            IconButton(
+              icon: Icon(FontAwesomeIcons.dice),
+              onPressed: _newShuffle,
+            ),
             StreamBuilder<KingdomState>(
                 stream: kingdomBloc.kingdomStream,
                 builder: (BuildContext context,
@@ -211,17 +197,33 @@ class KingdomPageState extends State<KingdomPage> {
                                                   .colorScheme
                                                   .onSecondary),
                                         )),
-                                    key: Key(snapshot.data.eventsLandmarksProjects[index - snapshot.data.numberOfKingdomCards - snapshot.data.numberOfBroughtCards].id
+                                    key: Key(snapshot
+                                        .data
+                                        .eventsLandmarksProjects[index -
+                                            snapshot.data.numberOfKingdomCards -
+                                            snapshot.data.numberOfBroughtCards]
+                                        .id
                                         .toString()),
                                     onDismissed: (d) {
                                       _scaffold = Scaffold.of(context);
-                                      _swapEventLandmarkProject(snapshot.data.eventsLandmarksProjects[index - snapshot.data.numberOfKingdomCards - snapshot.data.numberOfBroughtCards]);
+                                      _swapEventLandmarkProject(
+                                          snapshot.data.eventsLandmarksProjects[
+                                              index -
+                                                  snapshot.data
+                                                      .numberOfKingdomCards -
+                                                  snapshot.data
+                                                      .numberOfBroughtCards]);
                                     },
                                     direction: DismissDirection.endToStart,
                                     child: KingdomCardItem(
                                         card:
                                             snapshot.data
-                                                    .eventsLandmarksProjects[index - snapshot.data.numberOfKingdomCards - snapshot.data.numberOfBroughtCards],
+                                                    .eventsLandmarksProjects[
+                                                index -
+                                                    snapshot.data
+                                                        .numberOfKingdomCards -
+                                                    snapshot.data
+                                                        .numberOfBroughtCards],
                                         isEventProjectOrLandmark: true,
                                         topBorder: index ==
                                             (snapshot

@@ -1,8 +1,10 @@
+import 'package:dominionizer_app/model/theme_model.dart';
 import 'package:dominionizer_app/pages/blacklist_page.dart';
 import 'package:dominionizer_app/pages/rules_page.dart';
 import 'package:flutter/material.dart';
 import 'package:dominionizer_app/pages.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 
 class MyDrawer extends StatefulWidget {  
   @override
@@ -83,6 +85,19 @@ class _MyDrawerState extends State<MyDrawer> {
                 new MaterialPageRoute(builder: (ctx) => new SettingsPage(title: "Settings"))
               );
             },
+          ),
+          Consumer<ThemeModel>(
+            builder: (context, themeModel, child) {
+              return ListTile(
+                leading: const Text(""),
+                title: Text('Night Mode'),
+                trailing: Icon(
+                  (themeModel.useDarkTheme) ? FontAwesomeIcons.solidMoon : FontAwesomeIcons.moon,
+                  color: (themeModel.useDarkTheme) ? Colors.yellow : Colors.black,
+                ),
+                onTap: () => themeModel.useDarkTheme = !themeModel.useDarkTheme
+              );
+            }
           ),
         ],
       )

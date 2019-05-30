@@ -24,7 +24,7 @@ class DBProvider {
   initDB() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path =
-        join(documentsDirectory.path, "dominionizer-20190513.db");
+        join(documentsDirectory.path, "dominionizer-20190528-2.db");
 
     if (FileSystemEntity.typeSync(path) == FileSystemEntityType.notFound) {
       ByteData data = await rootBundle.load(join('assets', 'dominionizer.db'));
